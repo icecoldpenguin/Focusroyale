@@ -726,53 +726,7 @@ async def initialize_shop_items():
     
     await db.shop_items.insert_many(new_items)
     
-    # Initialize some sample tasks
-    sample_tasks = [
-        {
-            "id": str(uuid.uuid4()),
-            "title": "Read for 30 minutes",
-            "description": "Complete a 30-minute focused reading session",
-            "credits_reward": 3,
-            "is_active": True,
-            "created_at": datetime.utcnow()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "Exercise workout",
-            "description": "Complete a workout or physical exercise session",
-            "credits_reward": 3,
-            "is_active": True,
-            "created_at": datetime.utcnow()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "Learn something new",
-            "description": "Spend time learning a new skill or topic",
-            "credits_reward": 3,
-            "is_active": True,
-            "created_at": datetime.utcnow()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "Organize workspace",
-            "description": "Clean and organize your work area",
-            "credits_reward": 3,
-            "is_active": True,
-            "created_at": datetime.utcnow()
-        },
-        {
-            "id": str(uuid.uuid4()),
-            "title": "Plan your day",
-            "description": "Create a detailed plan for your daily activities",
-            "credits_reward": 3,
-            "is_active": True,
-            "created_at": datetime.utcnow()
-        }
-    ]
-    
-    await db.tasks.insert_many(sample_tasks)
-    
-    return {"message": "Shop items and tasks initialized successfully"}
+    return {"message": "Shop items initialized successfully"}
 
 # Include the router in the main app
 app.include_router(api_router)
