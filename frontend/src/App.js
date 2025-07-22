@@ -286,16 +286,6 @@ function App() {
               {authMode === 'login' ? 'Enter the Arena' : 'Join the Battle'}
             </button>
           </form>
-          
-          {/* Admin Controls */}
-          <div className="mt-6 pt-4 border-t border-gray-700">
-            <button
-              onClick={resetDatabase}
-              className="w-full bg-red-800 hover:bg-red-700 text-white p-2 rounded text-sm transition-colors"
-            >
-              🔄 Reset Database (Admin)
-            </button>
-          </div>
         </div>
       </div>
     );
