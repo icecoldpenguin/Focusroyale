@@ -198,9 +198,12 @@ async def login_user(input: UserLogin):
     # Update user data after cleaning effects
     updated_user = await db.users.find_one({"id": user["id"]})
     
-    # Return user without password hash
-    user_dict = User(**updated_user).dict()
-    del user_dict['password_hash']
+    # Return user without password hash and MongoDB _id
+    user_dict = dict(updated_user)
+    if '_id' in user_dict:
+        del user_dict['_id']
+    if 'password_hash' in user_dict:
+        del user_dict['password_hash']
     return {"user": user_dict, "message": "Login successful"}
 
 # ==================== USER ENDPOINTS ====================
