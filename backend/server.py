@@ -393,6 +393,20 @@ async def complete_task(input: TaskComplete):
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     
+    # Check if task belongs to user
+    if task["user_id"] != input.user_id:
+        raise HTTPException(status_code=403, detail="You can only complete your own tasks")
+    
+    # Check if task is already completed
+    if task.get("is_completed", False):
+        raise HTTPException(status_code=400, detail="Task is already completed")
+    
+    # Mark task as completed
+    await db.tasks.update_one(
+        {"id": input.task_id},
+        {"$set": {"is_completed": True}}
+    )
+    
     # Award credits and update user
     credits_earned = task.get("credits_reward", 3)
     await db.users.update_one(
