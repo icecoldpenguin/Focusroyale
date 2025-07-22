@@ -107,15 +107,18 @@ user_problem_statement: "Add a bar for the tasks section to be able to input tas
 backend:
   - task: "Personal Task Creation System"
     implemented: true
-    working: "NA"
+    working: true
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Modified Task model to include user_id and is_completed fields. Updated create_task endpoint to require user_id. Updated get_tasks to get_user_tasks endpoint that filters by user_id and excludes completed tasks. Updated task completion to mark task as completed and verify ownership."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Personal task creation system working perfectly. Tested: 1) Task creation via POST /api/tasks with user_id, title, description - creates tasks with correct ownership and 3 credit reward. 2) User-specific task retrieval via GET /api/tasks/{user_id} - correctly filters by user and excludes completed tasks. 3) Task completion via POST /api/tasks/complete - awards 3 credits, updates user stats, creates activity notifications, enforces ownership (users can only complete their own tasks). 4) Completed tasks correctly removed from active lists. 5) Task ownership validation prevents cross-user task completion. All core functionality working as specified."
 
   - task: "User Management System"
     implemented: true
@@ -153,7 +156,7 @@ backend:
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -161,6 +164,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ PASSED - Shop system working correctly. Tested shop initialization, item retrieval (found 4 boost + 4 sabotage items), insufficient credits handling, and purchase tracking. Boost/sabotage mechanics verified through item structure and purchase validation."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Comprehensive shop pass testing completed. All 6 shop pass types verified: 1) Level Pass (100 credits) - increases user level by 1, correctly deducts credits. 2) Progression Pass (80 credits) - increases credit rate multiplier by +0.5x permanently. 3) Degression Pass (120 credits) - applies temporary -0.5x rate reduction to target for 24 hours, creates notifications. 4) Reset Pass (500 credits) - resets target user's credits to 0. 5) Ally Token (60 credits) - gives both users +1x credit rate for 3 hours with proper expiration. 6) Trade Pass (50 credits) - creates trade request requiring mutual consent. Targeting system works correctly - validates target user exists, enforces target requirements. Credit deduction working properly. Temporary effects have correct expiration times. Activity notifications created for pass usage."
 
   - task: "Leaderboard System"
     implemented: true
@@ -176,6 +182,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ PASSED - Leaderboard system working correctly. Verified users are sorted by credits in descending order, all test users appear in leaderboard, and endpoint returns proper user data structure."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Leaderboard contains only registered users (no example users like alice_focus). Verified that only users created through registration appear in leaderboard, properly sorted by credits in descending order."
 
 frontend:
   - task: "Personal Task Creation Interface"
