@@ -621,11 +621,11 @@ function App() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {shopItems.map(item => (
-                <div key={item.id} className={`card-enhanced rounded-lg p-6 ${
+              {shopItems.map((item, index) => (
+                <div key={item.id} className={`shop-item-animated card-enhanced rounded-lg p-6 ${
                   item.item_type === 'sabotage' ? 'shop-item-sabotage' :
                   item.item_type === 'special' ? 'shop-item-special' : 'shop-item-boost'
-                }`}>
+                }`} style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-lg font-bold flex items-center">
                       <span className="text-2xl mr-2">{item.emoji}</span>
@@ -645,7 +645,7 @@ function App() {
                     <div>
                       <select 
                         id={`target-${item.id}`}
-                        className="form-input w-full p-2 rounded mb-3 text-sm"
+                        className="custom-select w-full mb-3"
                         defaultValue=""
                       >
                         <option value="" disabled>Select target user</option>
