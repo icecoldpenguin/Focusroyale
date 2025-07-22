@@ -136,6 +136,7 @@ function App() {
       await fetchNotifications();
       await fetchTasks();
       
+      await fetchTasks();
       
     } catch (error) {
       console.error('Auth failed:', error);
