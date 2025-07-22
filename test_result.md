@@ -246,16 +246,13 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User Management System"
-    - "Focus Session Tracking"
+    - "Personal Task Creation System"
+    - "Personal Task Creation Interface"
     - "Strategic Shop System"
-    - "Leaderboard System"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
-    message: "Built complete Focus Royale MVP with core features: user system, focus tracking with credit earning, strategic shop with boost/sabotage items, leaderboards, and sleek UI. Ready for backend testing to verify all API endpoints work correctly."
-  - agent: "testing"
-    message: "✅ BACKEND TESTING COMPLETE - All 4 high-priority backend tasks are working correctly. Comprehensive API testing performed covering all 11 endpoints. Key findings: User management with username uniqueness ✅, Focus sessions with proper credit calculation ✅, Shop system with boost/sabotage items ✅, Leaderboard with correct sorting ✅. All critical business logic verified including credit formula (duration * multiplier), boost effects, sabotage mechanics, and session management. Backend is production-ready."
+    message: "Implemented personal task creation system. Users can now create their own tasks through a new input form in the tasks tab. Modified backend to support user-specific tasks with ownership validation. Updated frontend with task creation interface. Ready to test new task functionality and verify shop passes work correctly."
