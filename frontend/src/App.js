@@ -76,11 +76,30 @@ function App() {
   };
 
   const fetchTasks = async () => {
+    if (!currentUser) return;
     try {
-      const response = await axios.get(`${API}/tasks`);
+      const response = await axios.get(`${API}/tasks/${currentUser.id}`);
       setTasks(response.data);
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
+    }
+  };
+
+  const createTask = async (title, description) => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await axios.post(`${API}/tasks`, {
+        user_id: currentUser.id,
+        title: title.trim(),
+        description: description.trim()
+      });
+      
+      await fetchTasks(); // Refresh task list
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      throw error;
     }
   };
 
