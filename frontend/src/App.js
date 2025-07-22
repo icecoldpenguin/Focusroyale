@@ -318,6 +318,9 @@ function App() {
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [socialRate, setSocialRate] = useState({ active_users_count: 0, social_multiplier: 1.0, credits_per_hour: 10 });
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // beforeunload handler to prevent tab close during active focus session
   useEffect(() => {
