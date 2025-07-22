@@ -225,9 +225,12 @@ async def get_user(user_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    # Remove password hash from response
-    user_dict = User(**user).dict()
-    del user_dict['password_hash']
+    # Remove MongoDB _id and password hash from response
+    user_dict = dict(user)
+    if '_id' in user_dict:
+        del user_dict['_id']
+    if 'password_hash' in user_dict:
+        del user_dict['password_hash']
     return user_dict
 
 @api_router.get("/leaderboard", response_model=List[Dict[str, Any]])
