@@ -207,11 +207,16 @@ async def login_user(input: UserLogin):
 async def get_users():
     await clean_expired_effects()
     users = await db.users.find().to_list(1000)
-    # Remove password hashes from response
+    # Convert ObjectId to string and remove password hashes
+    result = []
     for user in users:
-        if 'password_hash' in user:
-            del user['password_hash']
-    return users
+        user_dict = dict(user)
+        if '_id' in user_dict:
+            del user_dict['_id']  # Remove MongoDB _id field
+        if 'password_hash' in user_dict:
+            del user_dict['password_hash']
+        result.append(user_dict)
+    return result
 
 @api_router.get("/users/{user_id}", response_model=Dict[str, Any])
 async def get_user(user_id: str):
