@@ -687,9 +687,15 @@ function App() {
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Focus Royale</h1>
           <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-6">
             <div className="text-right">
               <div className="text-lg font-semibold flex items-center">
-                {currentUser.username}
+                <span 
+                  className="clickable-username"
+                  onClick={() => handleUserClick(currentUser)}
+                >
+                  {currentUser.username}
+                </span>
                 {currentUser.level > 1 && (
                   <span className="ml-2 bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">
                     L{currentUser.level}
@@ -709,6 +715,14 @@ function App() {
                 {unreadNotifications.length}
               </div>
             )}
+            <button
+              onClick={() => setShowSettings(true)}
+              className="btn-enhanced px-3 py-1 rounded"
+              style={{ backgroundColor: 'var(--bg-tertiary)' }}
+              title="Settings"
+            >
+              ⚙️
+            </button>
             <ThemeToggle />
             <button
               onClick={() => setCurrentUser(null)}
