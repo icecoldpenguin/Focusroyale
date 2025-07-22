@@ -134,11 +134,15 @@ def verify_password(password: str, password_hash: str) -> bool:
     return hashlib.sha256(password.encode()).hexdigest() == password_hash
 
 async def calculate_effective_credit_rate(user_data: dict) -> float:
-    """Calculate user's current effective credit rate including temporary effects"""
+    """Calculate user's current effective credit rate including temporary effects and social multiplier"""
     base_rate = user_data.get("credit_rate_multiplier", 1.0)
     effective_rate = base_rate
     
-    # Check for active effects
+    # Get social multiplier based on number of active focusing users
+    active_users_count = await db.users.count_documents({"is_focusing": True})
+    social_multiplier = max(1.0, float(active_users_count))  # Minimum 1.0x if no one is focusing
+    
+    # Check for temporary effects
     active_effects = user_data.get("active_effects", [])
     current_time = datetime.utcnow()
     
@@ -149,7 +153,10 @@ async def calculate_effective_credit_rate(user_data: dict) -> float:
             elif effect["type"] == "ally_boost":
                 effective_rate += effect.get("rate_boost", 1.0)
     
-    return max(0.1, effective_rate)  # Minimum rate of 0.1
+    # Apply social multiplier to final rate
+    final_rate = max(0.1, effective_rate) * social_multiplier
+    
+    return final_rate
 
 async def clean_expired_effects():
     """Remove expired effects from all users"""
