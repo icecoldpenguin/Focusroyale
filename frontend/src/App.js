@@ -570,27 +570,72 @@ function App() {
         {activeTab === 'tasks' && (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold">Task Completion</h2>
-              <p className="text-gray-600">Complete tasks to earn 3 FC each</p>
+              <h2 className="text-2xl font-bold">Personal Tasks</h2>
+              <p className="text-gray-600">Create and complete your own tasks to earn 3 FC each</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tasks.map(task => (
-                <div key={task.id} className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all">
-                  <h3 className="text-lg font-bold mb-2">{task.title}</h3>
-                  <p className="text-gray-600 mb-4 text-sm">{task.description}</p>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-green-600 font-semibold">+{task.credits_reward} FC</span>
-                    <button
-                      onClick={() => completeTask(task.id)}
-                      className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700 transition-colors"
-                    >
-                      Complete
-                    </button>
-                  </div>
+            {/* Task Creation Form */}
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-bold mb-4">Create New Task</h3>
+              <form onSubmit={handleCreateTask} className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Task title (e.g., Read for 30 minutes)"
+                    value={newTask.title}
+                    onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                    maxLength={100}
+                  />
                 </div>
-              ))}
+                <div>
+                  <textarea
+                    placeholder="Task description (optional)"
+                    value={newTask.description}
+                    onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
+                    rows="3"
+                    maxLength={300}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="bg-black text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+                >
+                  Create Task
+                </button>
+              </form>
+            </div>
+            
+            {/* Tasks List */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Your Active Tasks</h3>
+              {tasks.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No tasks yet. Create your first task above!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {tasks.map(task => (
+                    <div key={task.id} className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all">
+                      <h4 className="text-lg font-bold mb-2">{task.title}</h4>
+                      {task.description && (
+                        <p className="text-gray-600 mb-4 text-sm">{task.description}</p>
+                      )}
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-green-600 font-semibold">+{task.credits_reward} FC</span>
+                        <button
+                          onClick={() => completeTask(task.id)}
+                          className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700 transition-colors"
+                        >
+                          Complete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
