@@ -578,7 +578,7 @@ function App() {
                 { label: 'Credit Rate', value: `${currentUser.credit_rate_multiplier.toFixed(1)}x` },
                 { label: 'Tasks Done', value: currentUser.completed_tasks }
               ].map((stat, index) => (
-                <div key={index} className="card-enhanced p-4 rounded-lg text-center" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}>
+                <div key={index} className="stats-card card-enhanced p-4 rounded-lg text-center" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}>
                   <div className="text-2xl font-bold">{stat.value}</div>
                   <div className="opacity-80">{stat.label}</div>
                 </div>
