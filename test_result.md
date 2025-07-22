@@ -102,9 +102,24 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Add a bar for the tasks section to be able to input tasks and they earn 3 credits when the task is checked/completed, also remove the example users from the leaderboard, eg alice_focus, and keep only users who are registered users, ensure the passes work correctly"
+user_problem_statement: "we want the credit rate to be equal to the amount of users focusing, so if 2 are focusing, the credit rate is 2.0x or 20 credits/hour"
 
 backend:
+  - task: "Social Credit Rate System"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented social credit rate system where credit rate = number of users focusing. Modified calculate_effective_credit_rate to include social_multiplier based on active users count. Added GET /api/focus/social-rate endpoint to expose current social rate. Updated credit calculation to use: (duration_minutes / 6) * personal_rate * social_multiplier."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Social credit rate system working perfectly. Verified: 1) Social rate endpoint returns correct multipliers (1.0x minimum, scales with active users). 2) Credit calculation formula verified: (duration_minutes / 6) * personal_rate * social_multiplier. 3) Dynamic rate scaling: 0 users = 1.0x, 1 user = 1.0x, 2 users = 2.0x, 3 users = 3.0x. 4) Personal multipliers (Progression Pass) combine correctly with social rate. 5) Temporary effects work on top of social rate. 6) Complete workflow with users joining/leaving dynamically adjusts rates correctly."
+
   - task: "Personal Task Creation System"
     implemented: true
     working: true
@@ -115,10 +130,10 @@ backend:
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Modified Task model to include user_id and is_completed fields. Updated create_task endpoint to require user_id. Updated get_tasks to get_user_tasks endpoint that filters by user_id and excludes completed tasks. Updated task completion to mark task as completed and verify ownership."
+        comment: "Modified Task model to include user_id and is_completed fields. Updated create_task endpoint to require user_id. Updated get_user_tasks endpoint that filters by user_id and excludes completed tasks. Updated task completion to mark task as completed and verify ownership."
       - working: true
         agent: "testing"
-        comment: "✅ PASSED - Personal task creation system working perfectly. Tested: 1) Task creation via POST /api/tasks with user_id, title, description - creates tasks with correct ownership and 3 credit reward. 2) User-specific task retrieval via GET /api/tasks/{user_id} - correctly filters by user and excludes completed tasks. 3) Task completion via POST /api/tasks/complete - awards 3 credits, updates user stats, creates activity notifications, enforces ownership (users can only complete their own tasks). 4) Completed tasks correctly removed from active lists. 5) Task ownership validation prevents cross-user task completion. All core functionality working as specified."
+        comment: "✅ PASSED - Personal task system working perfectly. Tested task creation with user_id, title, description. Task retrieval filters correctly by user and excludes completed tasks. Task completion awards 3 credits, updates user stats, creates activity notifications, and enforces ownership validation. Users can only complete their own tasks."
 
   - task: "User Management System"
     implemented: true
