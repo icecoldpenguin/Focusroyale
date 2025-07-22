@@ -40,10 +40,9 @@ function App() {
 
   const initializeData = async () => {
     try {
-      // Initialize shop items and tasks
+      // Initialize shop items
       await axios.post(`${API}/init`);
       await fetchShopItems();
-      await fetchTasks();
       setIsInitialized(true);
     } catch (error) {
       console.error('Failed to initialize:', error);
