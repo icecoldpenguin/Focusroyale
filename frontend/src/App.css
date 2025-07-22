@@ -289,7 +289,7 @@ body {
   box-shadow: 0 10px 25px var(--shadow-medium);
 }
 
-/* Focus Session Enhancements */
+/* Focus Session Enhancements - Removed floating animation */
 .focus-timer-container {
   animation: slideInUp 0.8s ease-out;
 }
@@ -297,7 +297,7 @@ body {
 .focus-session-active {
   background: linear-gradient(135deg, #10b981, #059669);
   box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
-  animation: pulse 3s ease-in-out infinite;
+  border: 2px solid #10b981;
 }
 
 .focus-session-inactive {
