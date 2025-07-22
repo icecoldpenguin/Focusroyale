@@ -186,6 +186,18 @@ backend:
         agent: "testing"
         comment: "✅ PASSED - Leaderboard contains only registered users (no example users like alice_focus). Verified that only users created through registration appear in leaderboard, properly sorted by credits in descending order."
 
+  - task: "Social Credit Rate System"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Social Credit Rate System working perfectly! Comprehensive testing completed: 1) Social rate endpoint GET /api/focus/social-rate correctly returns 1.0x when no users focusing (10 credits/hour baseline). 2) Social multiplier scales correctly: 1 user = 1.0x, 2 users = 2.0x, 3 users = 3.0x rate. 3) Credit calculation formula verified: credits_earned = (duration_minutes / 6) * personal_multiplier * social_multiplier. 4) Social rate decreases when users end sessions (3→2→1→0 users). 5) Personal multipliers (Progression Pass +0.5x) work with social rate. 6) Effective rate = personal_rate * social_rate (e.g., 1.5x * 2.0x = 3.0x). 7) Edge cases handled: all users ending simultaneously. 8) Formula verified: max(1.0, active_focusing_users_count). 9) Complete workflow tested with dynamic rate adjustments. 10) Minimum 1.0x rate maintained when no users focusing. Production-ready!"
+
 frontend:
   - task: "Personal Task Creation Interface"
     implemented: true
