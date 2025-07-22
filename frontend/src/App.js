@@ -134,6 +134,8 @@ function App() {
       setAuthForm({ username: '', password: '' });
       await fetchUsers();
       await fetchNotifications();
+      await fetchTasks();
+      
       
     } catch (error) {
       console.error('Auth failed:', error);
