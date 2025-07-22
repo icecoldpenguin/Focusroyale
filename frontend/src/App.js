@@ -91,6 +91,218 @@ const ThemeToggle = () => {
   );
 };
 
+// User Profile Modal Component
+const UserProfileModal = ({ user, isOpen, onClose }) => {
+  if (!isOpen || !user) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content profile-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="avatar-container">
+          {user.profile_picture ? (
+            <img src={user.profile_picture} alt={user.username} className="avatar-img" />
+          ) : (
+            <div className="default-avatar">
+              {user.username.charAt(0).toUpperCase()}
+            </div>
+          )}
+        </div>
+        
+        <h2 className="text-2xl font-bold mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>
+          {user.username}
+        </h2>
+        
+        {user.level > 1 && (
+          <div className="mb-4">
+            <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">
+              Level {user.level}
+            </span>
+          </div>
+        )}
+        
+        {user.bio && (
+          <div className="bio-display">
+            <p style={{ color: 'var(--text-secondary)' }}>{user.bio}</p>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{user.credits}</div>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Focus Credits</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{user.total_focus_time}</div>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Minutes Focused</div>
+          </div>
+        </div>
+        
+        <button
+          onClick={onClose}
+          className="btn-enhanced mt-6 px-6 py-2 rounded-lg"
+          style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// User Settings Modal Component  
+const UserSettingsModal = ({ isOpen, onClose, currentUser, onUpdateUser }) => {
+  const [settings, setSettings] = useState({
+    username: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+    bio: '',
+    profile_picture: ''
+  });
+
+  useEffect(() => {
+    if (currentUser) {
+      setSettings(prev => ({
+        ...prev,
+        username: currentUser.username || '',
+        bio: currentUser.bio || '',
+        profile_picture: currentUser.profile_picture || ''
+      }));
+    }
+  }, [currentUser]);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setSettings(prev => ({ ...prev, profile_picture: e.target.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      // Validate passwords if changing
+      if (settings.newPassword && settings.newPassword !== settings.confirmPassword) {
+        alert('New passwords do not match');
+        return;
+      }
+
+      const updateData = {
+        user_id: currentUser.id,
+        username: settings.username.trim(),
+        bio: settings.bio.trim(),
+        profile_picture: settings.profile_picture
+      };
+
+      if (settings.currentPassword && settings.newPassword) {
+        updateData.current_password = settings.currentPassword;
+        updateData.new_password = settings.newPassword;
+      }
+
+      const response = await axios.put(`${API}/users/update`, updateData);
+      onUpdateUser(response.data.user);
+      alert('Settings updated successfully!');
+      onClose();
+    } catch (error) {
+      console.error('Failed to update settings:', error);
+      alert(error.response?.data?.detail || 'Failed to update settings');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content settings-modal" onClick={(e) => e.stopPropagation()}>
+        <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
+          User Settings
+        </h2>
+        
+        <div className="settings-section">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Profile Picture</h3>
+          <div className="text-center">
+            {settings.profile_picture ? (
+              <img src={settings.profile_picture} alt="Profile" className="avatar-img mx-auto mb-4" />
+            ) : (
+              <div className="default-avatar mx-auto mb-4">
+                {settings.username.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="file-upload">
+              <input type="file" accept="image/*" onChange={handleImageUpload} />
+              Choose Image
+            </div>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Profile Info</h3>
+          <input
+            type="text"
+            placeholder="Username"
+            value={settings.username}
+            onChange={(e) => setSettings(prev => ({ ...prev, username: e.target.value }))}
+            className="form-input form-input-animated w-full p-3 rounded mb-4"
+          />
+          <textarea
+            placeholder="Bio (optional)"
+            value={settings.bio}
+            onChange={(e) => setSettings(prev => ({ ...prev, bio: e.target.value }))}
+            className="form-input form-input-animated w-full p-3 rounded resize-none"
+            rows="3"
+            maxLength="200"
+          />
+        </div>
+
+        <div className="settings-section">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Change Password</h3>
+          <input
+            type="password"
+            placeholder="Current Password"
+            value={settings.currentPassword}
+            onChange={(e) => setSettings(prev => ({ ...prev, currentPassword: e.target.value }))}
+            className="form-input form-input-animated w-full p-3 rounded mb-4"
+          />
+          <input
+            type="password"
+            placeholder="New Password"
+            value={settings.newPassword}
+            onChange={(e) => setSettings(prev => ({ ...prev, newPassword: e.target.value }))}
+            className="form-input form-input-animated w-full p-3 rounded mb-4"
+          />
+          <input
+            type="password"
+            placeholder="Confirm New Password"
+            value={settings.confirmPassword}
+            onChange={(e) => setSettings(prev => ({ ...prev, confirmPassword: e.target.value }))}
+            className="form-input form-input-animated w-full p-3 rounded"
+          />
+        </div>
+
+        <div className="flex space-x-4 mt-6">
+          <button
+            onClick={handleSaveSettings}
+            className="btn-enhanced flex-1 py-3 rounded-lg font-semibold"
+            style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
+          >
+            Save Changes
+          </button>
+          <button
+            onClick={onClose}
+            className="btn-enhanced flex-1 py-3 rounded-lg font-semibold"
+            style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const { darkMode } = useTheme();
   const [currentUser, setCurrentUser] = useState(null);
