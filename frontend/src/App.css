@@ -3,17 +3,17 @@
 /* CSS Variables for theme support */
 :root {
   --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
-  --text-primary: #000000;
-  --text-secondary: #374151;
-  --text-muted: #6b7280;
-  --border-color: #d1d5db;
-  --accent-color: #000000;
-  --accent-hover: #1f2937;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #1a202c;
+  --text-secondary: #2d3748;
+  --text-muted: #4a5568;
+  --border-color: #cbd5e0;
+  --accent-color: #1a202c;
+  --accent-hover: #2d3748;
   --shadow-light: rgba(0, 0, 0, 0.1);
   --shadow-medium: rgba(0, 0, 0, 0.15);
-  --gradient-primary: linear-gradient(135deg, #000000, #1f2937);
+  --gradient-primary: linear-gradient(135deg, #1a202c, #2d3748);
 }
 
 [data-theme="dark"] {
