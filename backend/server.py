@@ -376,6 +376,20 @@ async def get_active_users():
         result.append(user_dict)
     return result
 
+@api_router.get("/focus/social-rate", response_model=Dict[str, Any])
+async def get_social_rate():
+    """Get current social multiplier based on active users"""
+    await clean_expired_effects()
+    active_users_count = await db.users.count_documents({"is_focusing": True})
+    social_multiplier = max(1.0, float(active_users_count))
+    
+    return {
+        "active_users_count": active_users_count,
+        "social_multiplier": social_multiplier,
+        "credits_per_hour": social_multiplier * 10,  # Base 10 credits/hour * multiplier
+        "description": f"{active_users_count} users focusing = {social_multiplier}x rate = {social_multiplier * 10} credits/hour"
+    }
+
 # ==================== TASKS ENDPOINTS ====================
 
 @api_router.post("/tasks", response_model=Task)
