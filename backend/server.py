@@ -237,11 +237,16 @@ async def get_user(user_id: str):
 async def get_leaderboard():
     await clean_expired_effects()
     users = await db.users.find().sort("credits", -1).limit(10).to_list(10)
-    # Remove password hashes from response
+    # Convert ObjectId to string and remove password hashes
+    result = []
     for user in users:
-        if 'password_hash' in user:
-            del user['password_hash']
-    return users
+        user_dict = dict(user)
+        if '_id' in user_dict:
+            del user_dict['_id']
+        if 'password_hash' in user_dict:
+            del user_dict['password_hash']
+        result.append(user_dict)
+    return result
 
 # ==================== FOCUS SESSION ENDPOINTS ====================
 
