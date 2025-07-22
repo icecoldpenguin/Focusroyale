@@ -19,7 +19,7 @@ import uuid
 from datetime import datetime, timedelta
 
 # Backend URL from frontend/.env
-BASE_URL = "https://d06fa30a-3a94-4fec-bca1-1b5cfcbea68c.preview.emergentagent.com/api"
+BASE_URL = "https://1db8c234-9a37-449d-9edd-dba7a8c4a143.preview.emergentagent.com/api"
 
 class PersonalTaskShopTester:
     def __init__(self):
