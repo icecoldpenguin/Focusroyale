@@ -26,10 +26,12 @@ function App() {
   // Set up polling for real-time updates when user is logged in
   useEffect(() => {
     if (currentUser) {
+      fetchTasks(); // Initial fetch when user logs in
       const interval = setInterval(() => {
         fetchActiveUsers();
         fetchUsers();
         fetchNotifications();
+        fetchTasks();
       }, 3000);
 
       return () => clearInterval(interval);
