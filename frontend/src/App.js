@@ -23,6 +23,26 @@ function App() {
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [socialRate, setSocialRate] = useState({ active_users_count: 0, social_multiplier: 1.0, credits_per_hour: 10 });
+  const [darkMode, setDarkMode] = useState(false);
+
+  // beforeunload handler to prevent tab close during active focus session
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (focusSession) {
+        e.preventDefault();
+        e.returnValue = 'You have an active focus session. Please end your session before leaving to save your progress.';
+        return e.returnValue;
+      }
+    };
+
+    if (focusSession) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [focusSession]);
 
   // Initialize data on component mount
   useEffect(() => {
