@@ -495,7 +495,7 @@ function App() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`nav-tab py-3 px-4 border-b-2 transition-all capitalize ${
+                className={`nav-tab nav-tab-animated py-3 px-4 border-b-2 transition-all capitalize ${
                   activeTab === tab 
                     ? 'active border-black font-semibold' 
                     : 'border-transparent opacity-70 hover:opacity-100'
