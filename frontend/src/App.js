@@ -1,6 +1,7 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import "./App.css";
 import axios from "axios";
+import ThreeBackground from "./ThreeBackground";
 
 // Theme Context
 const ThemeContext = createContext();
@@ -9,7 +10,80 @@ const useTheme = () => useContext(ThemeContext);
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Theme Provider Component
+const ThemeProvider = ({ children }) => {
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    return saved ? saved === 'dark' : false;
+  });
+
+  const toggleTheme = () => {
+    setDarkMode(prev => {
+      const newMode = !prev;
+      localStorage.setItem('theme', newMode ? 'dark' : 'light');
+      return newMode;
+    });
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
+
+  return (
+    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
+      <div className={`App ${darkMode ? 'dark' : 'light'}`}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
+};
+
+// Floating Doodles Component
+const FloatingDoodles = ({ darkMode }) => {
+  const doodles = [
+    { icon: '⚡', size: '2rem', top: '10%', left: '15%', delay: '0s' },
+    { icon: '🎯', size: '1.5rem', top: '20%', right: '20%', delay: '2s' },
+    { icon: '⭐', size: '1.8rem', top: '70%', left: '10%', delay: '4s' },
+    { icon: '💎', size: '1.6rem', bottom: '15%', right: '15%', delay: '1s' },
+    { icon: '🚀', size: '2.2rem', top: '50%', left: '5%', delay: '3s' },
+    { icon: '🔥', size: '1.4rem', top: '80%', right: '10%', delay: '5s' },
+  ];
+
+  return (
+    <>
+      {doodles.map((doodle, index) => (
+        <div
+          key={index}
+          className="floating-doodle"
+          style={{
+            ...doodle,
+            fontSize: doodle.size,
+            animationDelay: doodle.delay,
+            opacity: darkMode ? 0.3 : 0.2,
+          }}
+        >
+          {doodle.icon}
+        </div>
+      ))}
+    </>
+  );
+};
+
+// Theme Toggle Component
+const ThemeToggle = () => {
+  const { darkMode, toggleTheme } = useTheme();
+  
+  return (
+    <div
+      className={`theme-toggle ${darkMode ? 'dark' : ''}`}
+      onClick={toggleTheme}
+      title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
+    />
+  );
+};
+
 function App() {
+  const { darkMode } = useTheme();
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [activeUsers, setActiveUsers] = useState([]);
@@ -19,11 +93,10 @@ function App() {
   const [focusSession, setFocusSession] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
+  const [authMode, setAuthMode] = useState('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
   const [newTask, setNewTask] = useState({ title: '', description: '' });
   const [socialRate, setSocialRate] = useState({ active_users_count: 0, social_multiplier: 1.0, credits_per_hour: 10 });
-  const [darkMode, setDarkMode] = useState(false);
 
   // beforeunload handler to prevent tab close during active focus session
   useEffect(() => {
@@ -52,8 +125,8 @@ function App() {
   // Set up polling for real-time updates when user is logged in
   useEffect(() => {
     if (currentUser) {
-      fetchTasks(); // Initial fetch when user logs in
-      fetchSocialRate(); // Initial fetch of social rate
+      fetchTasks();
+      fetchSocialRate();
       const interval = setInterval(() => {
         fetchActiveUsers();
         fetchUsers();
@@ -68,10 +141,9 @@ function App() {
 
   const initializeData = async () => {
     try {
-      // Initialize shop items
       await axios.post(`${API}/init`);
       await fetchShopItems();
-      await fetchSocialRate(); // Get initial social rate
+      await fetchSocialRate();
       setIsInitialized(true);
     } catch (error) {
       console.error('Failed to initialize:', error);
@@ -134,7 +206,7 @@ function App() {
         description: description.trim()
       });
       
-      await fetchTasks(); // Refresh task list
+      await fetchTasks();
       return response.data;
     } catch (error) {
       console.error('Failed to create task:', error);
@@ -173,8 +245,6 @@ function App() {
       await fetchNotifications();
       await fetchTasks();
       
-      await fetchTasks();
-      
     } catch (error) {
       console.error('Auth failed:', error);
       alert(error.response?.data?.detail || `${authMode} failed`);
@@ -190,7 +260,6 @@ function App() {
         task_id: taskId
       });
       
-      // Update current user data
       const updatedUser = await axios.get(`${API}/users/${currentUser.id}`);
       setCurrentUser(updatedUser.data);
       
@@ -246,7 +315,6 @@ function App() {
       });
       setFocusSession(null);
       
-      // Update current user data
       const updatedUser = await axios.get(`${API}/users/${currentUser.id}`);
       setCurrentUser(updatedUser.data);
       
@@ -270,7 +338,6 @@ function App() {
         target_user_id: targetUserId
       });
       
-      // Update current user data
       const updatedUser = await axios.get(`${API}/users/${currentUser.id}`);
       setCurrentUser(updatedUser.data);
       
@@ -288,66 +355,69 @@ function App() {
     }
   };
 
-  const resetDatabase = async () => {
-    if (window.confirm('Are you sure you want to reset the entire database? This will remove all users and data.')) {
-      try {
-        await axios.post(`${API}/admin/reset-database`);
-        setCurrentUser(null);
-        setUsers([]);
-        setActiveUsers([]);
-        setNotifications([]);
-        alert('Database reset successfully!');
-      } catch (error) {
-        console.error('Failed to reset database:', error);
-        alert('Failed to reset database');
-      }
-    }
-  };
-
   if (!isInitialized) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-black text-xl">Initializing Focus Royale...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+        <div className="text-xl">
+          <div className="loading-spinner inline-block mr-3"></div>
+          Initializing Focus Royale...
+        </div>
       </div>
     );
   }
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="bg-black text-white p-8 rounded-lg shadow-2xl max-w-md w-full mx-4">
-          <h1 className="text-3xl font-bold text-center mb-2">Focus Royale</h1>
-          <p className="text-gray-300 text-center mb-6">
+      <div className="min-h-screen flex items-center justify-center login-container" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <ThreeBackground darkMode={darkMode} />
+        <FloatingDoodles darkMode={darkMode} />
+        
+        {/* Theme Toggle in top-right corner */}
+        <div className="absolute top-6 right-6 z-50">
+          <ThemeToggle />
+        </div>
+        
+        <div className="login-card p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 relative z-10">
+          <h1 className="login-title text-3xl font-bold text-center mb-2">Focus Royale</h1>
+          <p className="login-tagline text-center mb-6 opacity-80">
             Turn focus into currency. Strategy decides who rises.
           </p>
           
           {/* Auth Mode Toggle */}
-          <div className="flex bg-gray-800 rounded-lg p-1 mb-6">
+          <div className="auth-toggle flex rounded-lg p-1 mb-6" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
             <button
               onClick={() => setAuthMode('login')}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                authMode === 'login' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'
+              className={`flex-1 py-2 px-4 rounded-md transition-all btn-enhanced ${
+                authMode === 'login' 
+                  ? darkMode 
+                    ? 'bg-white text-black' 
+                    : 'bg-white text-black'
+                  : 'opacity-70 hover:opacity-100'
               }`}
             >
               Login
             </button>
             <button
               onClick={() => setAuthMode('register')}
-              className={`flex-1 py-2 px-4 rounded-md transition-colors ${
-                authMode === 'register' ? 'bg-white text-black' : 'text-gray-300 hover:text-white'
+              className={`flex-1 py-2 px-4 rounded-md transition-all btn-enhanced ${
+                authMode === 'register' 
+                  ? darkMode 
+                    ? 'bg-white text-black' 
+                    : 'bg-white text-black'
+                  : 'opacity-70 hover:opacity-100'
               }`}
             >
               Register
             </button>
           </div>
           
-          <form onSubmit={handleAuth}>
+          <form className="auth-form" onSubmit={handleAuth}>
             <input
               type="text"
               placeholder="Username"
               value={authForm.username}
               onChange={(e) => setAuthForm({...authForm, username: e.target.value})}
-              className="w-full p-3 bg-gray-800 text-white rounded mb-4 focus:outline-none focus:ring-2 focus:ring-gray-600"
+              className="form-input w-full p-3 rounded mb-4 focus:outline-none"
               required
             />
             <input
@@ -355,12 +425,16 @@ function App() {
               placeholder="Password"
               value={authForm.password}
               onChange={(e) => setAuthForm({...authForm, password: e.target.value})}
-              className="w-full p-3 bg-gray-800 text-white rounded mb-4 focus:outline-none focus:ring-2 focus:ring-gray-600"
+              className="form-input w-full p-3 rounded mb-4 focus:outline-none"
               required
             />
             <button
               type="submit"
-              className="w-full bg-white text-black p-3 rounded font-semibold hover:bg-gray-200 transition-colors"
+              className="btn-enhanced w-full p-3 rounded font-semibold"
+              style={{ 
+                backgroundColor: darkMode ? 'var(--accent-color)' : 'white',
+                color: darkMode ? 'var(--bg-primary)' : 'black'
+              }}
             >
               {authMode === 'login' ? 'Enter the Arena' : 'Join the Battle'}
             </button>
@@ -373,9 +447,9 @@ function App() {
   const unreadNotifications = notifications.filter(n => !n.is_read && n.user_id === currentUser.id);
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       {/* Header */}
-      <header className="bg-black text-white p-4">
+      <header className="header-container p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Focus Royale</h1>
           <div className="flex items-center space-x-6">
@@ -388,22 +462,24 @@ function App() {
                   </span>
                 )}
               </div>
-              <div className="text-gray-300">{currentUser.credits} FC</div>
-              <div className="text-sm text-gray-400">
+              <div className="opacity-80">{currentUser.credits} FC</div>
+              <div className="text-sm opacity-70">
                 Effective Rate: {(socialRate.social_multiplier * currentUser.credit_rate_multiplier).toFixed(1)}x
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs opacity-60">
                 Social: {socialRate.social_multiplier.toFixed(1)}x • Personal: {currentUser.credit_rate_multiplier.toFixed(1)}x
               </div>
             </div>
             {unreadNotifications.length > 0 && (
-              <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs">
+              <div className="notification-badge bg-red-500 text-white px-2 py-1 rounded-full text-xs">
                 {unreadNotifications.length}
               </div>
             )}
+            <ThemeToggle />
             <button
               onClick={() => setCurrentUser(null)}
-              className="bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded transition-colors"
+              className="btn-enhanced px-3 py-1 rounded"
+              style={{ backgroundColor: 'var(--bg-tertiary)' }}
             >
               Logout
             </button>
@@ -412,18 +488,22 @@ function App() {
       </header>
 
       {/* Navigation */}
-      <nav className="bg-gray-100 border-b">
+      <nav className="nav-container border-b">
         <div className="max-w-6xl mx-auto">
           <div className="flex space-x-8">
             {['dashboard', 'shop', 'tasks', 'leaderboard', 'activity'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-3 px-4 border-b-2 transition-colors capitalize ${
+                className={`nav-tab py-3 px-4 border-b-2 transition-all capitalize ${
                   activeTab === tab 
-                    ? 'border-black text-black font-semibold' 
-                    : 'border-transparent text-gray-600 hover:text-black'
+                    ? 'active border-black font-semibold' 
+                    : 'border-transparent opacity-70 hover:opacity-100'
                 }`}
+                style={{
+                  borderColor: activeTab === tab ? 'var(--accent-color)' : 'transparent',
+                  color: 'var(--text-primary)'
+                }}
               >
                 {tab}
               </button>
@@ -437,35 +517,38 @@ function App() {
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
             {/* Focus Timer */}
-            <div className="bg-gray-50 p-6 rounded-lg border-2 border-gray-200">
+            <div className={`focus-timer-container card-enhanced p-6 rounded-lg ${
+              focusSession ? 'focus-session-active' : 'focus-session-inactive'
+            }`}>
               <h2 className="text-xl font-bold mb-4">Focus Session</h2>
               
               {!focusSession ? (
                 <div className="text-center">
-                  <p className="text-gray-600 mb-2">
+                  <p className="mb-2 opacity-80">
                     Ready to earn some Focus Credits (FC)?
                   </p>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                    <div className="text-sm text-blue-800 font-semibold mb-1">
+                  <div className="card-enhanced p-3 mb-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                    <div className="font-semibold mb-1 focus-credits-animation">
                       Social Rate: {socialRate.social_multiplier.toFixed(1)}x ({socialRate.credits_per_hour} FC/hour)
                     </div>
-                    <div className="text-xs text-blue-600">
+                    <div className="text-xs opacity-70">
                       {socialRate.active_users_count} users focusing = {socialRate.social_multiplier.toFixed(1)}x multiplier
                     </div>
-                    <div className="text-xs text-blue-600 mt-1">
+                    <div className="text-xs opacity-70 mt-1">
                       Your personal rate: {(socialRate.social_multiplier * currentUser.credit_rate_multiplier).toFixed(1)}x
                     </div>
                   </div>
                   <button
                     onClick={startFocusSession}
-                    className="bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+                    className="btn-enhanced px-8 py-3 rounded-lg font-semibold"
+                    style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
                   >
                     Start Focus Session
                   </button>
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="bg-green-100 border-2 border-green-300 p-4 rounded-lg mb-4">
+                  <div className="p-4 rounded-lg mb-4" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', border: '2px solid #10b981' }}>
                     <div className="text-2xl font-bold text-green-800 mb-2">FOCUSING</div>
                     <div className="text-green-700">
                       Started at {new Date(focusSession.start_time).toLocaleTimeString()}
@@ -479,7 +562,7 @@ function App() {
                   </div>
                   <button
                     onClick={endFocusSession}
-                    className="bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                    className="btn-enhanced bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700"
                   >
                     End Session
                   </button>
@@ -489,31 +572,26 @@ function App() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-black text-white p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold">{currentUser.credits}</div>
-                <div className="text-gray-300">Focus Credits</div>
-              </div>
-              <div className="bg-black text-white p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold">{currentUser.total_focus_time}</div>
-                <div className="text-gray-300">Focus Minutes</div>
-              </div>
-              <div className="bg-black text-white p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold">{currentUser.credit_rate_multiplier.toFixed(1)}x</div>
-                <div className="text-gray-300">Credit Rate</div>
-              </div>
-              <div className="bg-black text-white p-4 rounded-lg text-center">
-                <div className="text-2xl font-bold">{currentUser.completed_tasks}</div>
-                <div className="text-gray-300">Tasks Done</div>
-              </div>
+              {[
+                { label: 'Focus Credits', value: currentUser.credits },
+                { label: 'Focus Minutes', value: currentUser.total_focus_time },
+                { label: 'Credit Rate', value: `${currentUser.credit_rate_multiplier.toFixed(1)}x` },
+                { label: 'Tasks Done', value: currentUser.completed_tasks }
+              ].map((stat, index) => (
+                <div key={index} className="card-enhanced p-4 rounded-lg text-center" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="opacity-80">{stat.label}</div>
+                </div>
+              ))}
             </div>
 
             {/* Active Users */}
             {activeUsers.length > 0 && (
-              <div className="bg-gray-50 p-6 rounded-lg border">
+              <div className="card-enhanced p-6 rounded-lg">
                 <h3 className="text-lg font-semibold mb-3">Currently Focusing</h3>
                 <div className="space-y-2">
                   {activeUsers.map(user => (
-                    <div key={user.id} className="flex justify-between items-center bg-white p-3 rounded border">
+                    <div key={user.id} className="activity-item flex justify-between items-center p-3 rounded">
                       <span className="font-medium flex items-center">
                         {user.username}
                         {user.level > 1 && (
@@ -523,7 +601,7 @@ function App() {
                         )}
                       </span>
                       <div className="flex items-center space-x-3">
-                        <span className="text-sm text-gray-600">{user.credits} FC</span>
+                        <span className="text-sm opacity-70">{user.credits} FC</span>
                         <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                       </div>
                     </div>
@@ -539,17 +617,14 @@ function App() {
           <div className="space-y-6">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold">Strategic Arsenal</h2>
-              <p className="text-gray-600">Boost yourself or target others with passes</p>
+              <p className="opacity-70">Boost yourself or target others with passes</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {shopItems.map(item => (
-                <div key={item.id} className={`border-2 rounded-lg p-6 transition-all hover:shadow-lg ${
-                  item.item_type === 'sabotage' 
-                    ? 'border-red-300 bg-red-50 hover:border-red-400' 
-                    : item.item_type === 'special'
-                    ? 'border-blue-300 bg-blue-50 hover:border-blue-400'
-                    : 'border-green-300 bg-green-50 hover:border-green-400'
+                <div key={item.id} className={`card-enhanced rounded-lg p-6 ${
+                  item.item_type === 'sabotage' ? 'shop-item-sabotage' :
+                  item.item_type === 'special' ? 'shop-item-special' : 'shop-item-boost'
                 }`}>
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-lg font-bold flex items-center">
@@ -557,21 +632,20 @@ function App() {
                       {item.name}
                     </h3>
                     <div className={`px-3 py-1 rounded text-sm font-semibold text-white ${
-                      item.item_type === 'sabotage' ? 'bg-red-600' 
-                      : item.item_type === 'special' ? 'bg-blue-600'
-                      : 'bg-green-600'
+                      item.item_type === 'sabotage' ? 'bg-red-600' :
+                      item.item_type === 'special' ? 'bg-blue-600' : 'bg-green-600'
                     }`}>
                       {item.price} FC
                     </div>
                   </div>
                   
-                  <p className="text-gray-700 mb-4 text-sm">{item.description}</p>
+                  <p className="opacity-80 mb-4 text-sm">{item.description}</p>
                   
                   {item.requires_target ? (
                     <div>
                       <select 
                         id={`target-${item.id}`}
-                        className="w-full p-2 border rounded mb-3 text-sm"
+                        className="form-input w-full p-2 rounded mb-3 text-sm"
                         defaultValue=""
                       >
                         <option value="" disabled>Select target user</option>
@@ -592,7 +666,7 @@ function App() {
                           }
                         }}
                         disabled={currentUser.credits < item.price}
-                        className={`w-full py-2 px-4 rounded font-semibold transition-colors text-white ${
+                        className={`btn-enhanced w-full py-2 px-4 rounded font-semibold text-white ${
                           currentUser.credits < item.price 
                             ? 'bg-gray-400 cursor-not-allowed' 
                             : item.item_type === 'sabotage' 
@@ -607,7 +681,7 @@ function App() {
                     <button
                       onClick={() => purchaseItem(item.id)}
                       disabled={currentUser.credits < item.price}
-                      className={`w-full py-2 px-4 rounded font-semibold transition-colors text-white ${
+                      className={`btn-enhanced w-full py-2 px-4 rounded font-semibold text-white ${
                         currentUser.credits < item.price 
                           ? 'bg-gray-400 cursor-not-allowed' 
                           : 'bg-green-600 hover:bg-green-700'
@@ -627,36 +701,33 @@ function App() {
           <div className="space-y-6">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold">Personal Tasks</h2>
-              <p className="text-gray-600">Create and complete your own tasks to earn 3 FC each</p>
+              <p className="opacity-70">Create and complete your own tasks to earn 3 FC each</p>
             </div>
             
             {/* Task Creation Form */}
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6">
+            <div className="card-enhanced p-6 rounded-lg">
               <h3 className="text-lg font-bold mb-4">Create New Task</h3>
               <form onSubmit={handleCreateTask} className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Task title (e.g., Read for 30 minutes)"
-                    value={newTask.title}
-                    onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
-                    maxLength={100}
-                  />
-                </div>
-                <div>
-                  <textarea
-                    placeholder="Task description (optional)"
-                    value={newTask.description}
-                    onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 resize-none"
-                    rows="3"
-                    maxLength={300}
-                  />
-                </div>
+                <input
+                  type="text"
+                  placeholder="Task title (e.g., Read for 30 minutes)"
+                  value={newTask.title}
+                  onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                  className="form-input w-full p-3 rounded focus:outline-none"
+                  maxLength={100}
+                />
+                <textarea
+                  placeholder="Task description (optional)"
+                  value={newTask.description}
+                  onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                  className="form-input w-full p-3 rounded focus:outline-none resize-none"
+                  rows="3"
+                  maxLength={300}
+                />
                 <button
                   type="submit"
-                  className="bg-black text-white px-6 py-2 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+                  className="btn-enhanced px-6 py-2 rounded-lg font-semibold"
+                  style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
                 >
                   Create Task
                 </button>
@@ -667,23 +738,23 @@ function App() {
             <div>
               <h3 className="text-lg font-semibold mb-4">Your Active Tasks</h3>
               {tasks.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 opacity-70">
                   <p>No tasks yet. Create your first task above!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {tasks.map(task => (
-                    <div key={task.id} className="bg-gray-50 border-2 border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all">
+                    <div key={task.id} className="card-enhanced p-6 rounded-lg">
                       <h4 className="text-lg font-bold mb-2">{task.title}</h4>
                       {task.description && (
-                        <p className="text-gray-600 mb-4 text-sm">{task.description}</p>
+                        <p className="opacity-70 mb-4 text-sm">{task.description}</p>
                       )}
                       
                       <div className="flex justify-between items-center">
                         <span className="text-green-600 font-semibold">+{task.credits_reward} FC</span>
                         <button
                           onClick={() => completeTask(task.id)}
-                          className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700 transition-colors"
+                          className="btn-enhanced bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700"
                         >
                           Complete
                         </button>
@@ -701,21 +772,25 @@ function App() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center">Leaderboard</h2>
             
-            <div className="bg-gray-50 rounded-lg border">
+            <div className="card-enhanced rounded-lg overflow-hidden">
               {users
                 .sort((a, b) => b.credits - a.credits)
                 .slice(0, 10)
                 .map((user, index) => (
-                  <div key={user.id} className={`flex justify-between items-center p-4 border-b last:border-b-0 ${
+                  <div key={user.id} className={`leaderboard-item flex justify-between items-center p-4 border-b last:border-b-0 ${
                     user.id === currentUser.id ? 'bg-yellow-100' : ''
+                  } ${
+                    index === 0 ? 'leaderboard-gold' :
+                    index === 1 ? 'leaderboard-silver' :
+                    index === 2 ? 'leaderboard-bronze' : ''
                   }`}>
                     <div className="flex items-center space-x-4">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                        index === 0 ? 'bg-yellow-500 text-white' :
-                        index === 1 ? 'bg-gray-400 text-white' :
-                        index === 2 ? 'bg-amber-600 text-white' :
-                        'bg-gray-200 text-gray-700'
-                      }`}>
+                        index < 3 ? 'text-white' : ''
+                      }`} style={{ 
+                        backgroundColor: index >= 3 ? 'var(--bg-tertiary)' : 'transparent',
+                        color: index >= 3 ? 'var(--text-primary)' : 'inherit'
+                      }}>
                         {index + 1}
                       </div>
                       <div>
@@ -727,14 +802,14 @@ function App() {
                             </span>
                           )}
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm opacity-70">
                           {user.total_focus_time} min focused • {user.credit_rate_multiplier.toFixed(1)}x rate • {user.completed_tasks} tasks
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-xl font-bold">{user.credits}</div>
-                      <div className="text-sm text-gray-600">FC</div>
+                      <div className="text-sm opacity-70">FC</div>
                     </div>
                   </div>
                 ))}
@@ -747,31 +822,31 @@ function App() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center">Activity Feed</h2>
             
-            <div className="bg-gray-50 rounded-lg border">
+            <div className="card-enhanced rounded-lg overflow-hidden">
               {notifications.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center opacity-70">
                   No recent activity. Start focusing or complete tasks to see updates!
                 </div>
               ) : (
-                notifications.map(notification => (
-                  <div key={notification.id} className={`p-4 border-b last:border-b-0 ${
+                notifications.map((notification, index) => (
+                  <div key={notification.id} className={`activity-item p-4 border-b last:border-b-0 ${
                     notification.user_id === currentUser.id && !notification.is_read ? 'bg-yellow-50' : ''
-                  }`}>
+                  }`} style={{ animationDelay: `${index * 0.1}s` }}>
                     <div className="flex justify-between items-start">
                       <div>
                         <div className={`font-medium ${
                           notification.notification_type === 'pass_used' ? 'text-red-600' :
                           notification.notification_type === 'task_completed' ? 'text-green-600' :
                           notification.notification_type === 'ally_formed' ? 'text-blue-600' :
-                          'text-gray-800'
-                        }`}>
+                          ''
+                        }`} style={{ color: 'var(--text-primary)' }}>
                           {notification.message}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs opacity-60 mt-1">
                           {notification.notification_type.replace('_', ' ').toUpperCase()}
                         </div>
                       </div>
-                      <div className="text-right text-sm text-gray-600">
+                      <div className="text-right text-sm opacity-70">
                         <div>{new Date(notification.timestamp).toLocaleString()}</div>
                         {notification.user_id === currentUser.id && !notification.is_read && (
                           <div className="text-xs text-red-500 mt-1">NEW</div>
@@ -789,4 +864,13 @@ function App() {
   );
 }
 
-export default App;
+// Main App Component with Theme Provider
+const AppWithTheme = () => {
+  return (
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
+  );
+};
+
+export default AppWithTheme;
