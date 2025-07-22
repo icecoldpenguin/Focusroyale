@@ -47,6 +47,7 @@ function App() {
       // Initialize shop items
       await axios.post(`${API}/init`);
       await fetchShopItems();
+      await fetchSocialRate(); // Get initial social rate
       setIsInitialized(true);
     } catch (error) {
       console.error('Failed to initialize:', error);
