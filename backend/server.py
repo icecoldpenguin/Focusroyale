@@ -178,8 +178,10 @@ async def register_user(input: UserRegister):
     )
     await db.users.insert_one(user.dict())
     
-    # Return user without password hash
+    # Return user without password hash and MongoDB _id
     user_dict = user.dict()
+    if '_id' in user_dict:
+        del user_dict['_id']
     del user_dict['password_hash']
     return {"user": user_dict, "message": "User registered successfully"}
 
