@@ -102,9 +102,21 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Build Focus Royale, a sleek productivity gamification app with strategic credit system, focus tracking, shop with sabotage mechanics, and leaderboards"
+user_problem_statement: "Add a bar for the tasks section to be able to input tasks and they earn 3 credits when the task is checked/completed, also remove the example users from the leaderboard, eg alice_focus, and keep only users who are registered users, ensure the passes work correctly"
 
 backend:
+  - task: "Personal Task Creation System"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Modified Task model to include user_id and is_completed fields. Updated create_task endpoint to require user_id. Updated get_tasks to get_user_tasks endpoint that filters by user_id and excludes completed tasks. Updated task completion to mark task as completed and verify ownership."
+
   - task: "User Management System"
     implemented: true
     working: true
@@ -141,7 +153,7 @@ backend:
     file: "server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
@@ -166,6 +178,18 @@ backend:
         comment: "✅ PASSED - Leaderboard system working correctly. Verified users are sorted by credits in descending order, all test users appear in leaderboard, and endpoint returns proper user data structure."
 
 frontend:
+  - task: "Personal Task Creation Interface"
+    implemented: true
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added task creation form in tasks tab with input fields for title and description. Updated fetchTasks to use new user-specific endpoint. Added createTask function and handleCreateTask handler. Updated tasks tab to show task creation form and user's active tasks with empty state."
+
   - task: "Focus Timer Interface"
     implemented: true
     working: "NA"
@@ -184,7 +208,7 @@ frontend:
     file: "App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
