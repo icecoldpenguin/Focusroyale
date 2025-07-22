@@ -377,9 +377,9 @@ async def create_task(input: TaskCreate):
     await db.tasks.insert_one(task.dict())
     return task
 
-@api_router.get("/tasks", response_model=List[Task])
-async def get_tasks():
-    tasks = await db.tasks.find({"is_active": True}).to_list(1000)
+@api_router.get("/tasks/{user_id}", response_model=List[Task])
+async def get_user_tasks(user_id: str):
+    tasks = await db.tasks.find({"user_id": user_id, "is_active": True, "is_completed": False}).to_list(1000)
     return [Task(**task) for task in tasks]
 
 @api_router.post("/tasks/complete", response_model=Dict[str, Any])
