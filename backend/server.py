@@ -350,11 +350,16 @@ async def end_focus_session(input: FocusSessionEnd):
 async def get_active_users():
     await clean_expired_effects()
     users = await db.users.find({"is_focusing": True}).to_list(1000)
-    # Remove password hashes from response
+    # Convert ObjectId to string and remove password hashes
+    result = []
     for user in users:
-        if 'password_hash' in user:
-            del user['password_hash']
-    return users
+        user_dict = dict(user)
+        if '_id' in user_dict:
+            del user_dict['_id']
+        if 'password_hash' in user_dict:
+            del user_dict['password_hash']
+        result.append(user_dict)
+    return result
 
 # ==================== TASKS ENDPOINTS ====================
 
