@@ -18,6 +18,7 @@ function App() {
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
   const [newTask, setNewTask] = useState({ title: '', description: '' });
+  const [socialRate, setSocialRate] = useState({ active_users_count: 0, social_multiplier: 1.0, credits_per_hour: 10 });
 
   // Initialize data on component mount
   useEffect(() => {
