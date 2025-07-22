@@ -47,6 +47,15 @@ const FloatingDoodles = ({ darkMode }) => {
     { icon: '💎', size: '1.6rem', bottom: '15%', right: '15%', delay: '1s' },
     { icon: '🚀', size: '2.2rem', top: '50%', left: '5%', delay: '3s' },
     { icon: '🔥', size: '1.4rem', top: '80%', right: '10%', delay: '5s' },
+    { icon: '💪', size: '1.7rem', top: '30%', left: '8%', delay: '6s' },
+    { icon: '⚔️', size: '1.9rem', bottom: '30%', left: '20%', delay: '7s' },
+    { icon: '🏆', size: '1.6rem', top: '60%', right: '25%', delay: '8s' },
+    { icon: '⚡', size: '1.3rem', bottom: '50%', right: '5%', delay: '9s' },
+    { icon: '🎪', size: '1.8rem', top: '15%', left: '25%', delay: '10s' },
+    { icon: '🎭', size: '1.5rem', bottom: '20%', left: '8%', delay: '11s' },
+    { icon: '🎨', size: '1.4rem', top: '85%', left: '30%', delay: '12s' },
+    { icon: '🎲', size: '1.6rem', top: '40%', right: '8%', delay: '13s' },
+    { icon: '⭐', size: '1.2rem', bottom: '60%', left: '12%', delay: '14s' },
   ];
 
   return (
@@ -59,7 +68,7 @@ const FloatingDoodles = ({ darkMode }) => {
             ...doodle,
             fontSize: doodle.size,
             animationDelay: doodle.delay,
-            opacity: darkMode ? 0.3 : 0.2,
+            opacity: darkMode ? 0.4 : 0.3,
           }}
         >
           {doodle.icon}
