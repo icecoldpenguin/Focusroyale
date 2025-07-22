@@ -17,6 +17,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
+  const [newTask, setNewTask] = useState({ title: '', description: '' });
 
   // Initialize data on component mount
   useEffect(() => {
