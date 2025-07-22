@@ -705,7 +705,7 @@ function App() {
             </div>
             
             {/* Task Creation Form */}
-            <div className="card-enhanced p-6 rounded-lg">
+            <div className="form-animated card-enhanced p-6 rounded-lg">
               <h3 className="text-lg font-bold mb-4">Create New Task</h3>
               <form onSubmit={handleCreateTask} className="space-y-4">
                 <input
@@ -713,14 +713,14 @@ function App() {
                   placeholder="Task title (e.g., Read for 30 minutes)"
                   value={newTask.title}
                   onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-                  className="form-input w-full p-3 rounded focus:outline-none"
+                  className="form-input form-input-animated w-full p-3 rounded focus:outline-none"
                   maxLength={100}
                 />
                 <textarea
                   placeholder="Task description (optional)"
                   value={newTask.description}
                   onChange={(e) => setNewTask({...newTask, description: e.target.value})}
-                  className="form-input w-full p-3 rounded focus:outline-none resize-none"
+                  className="form-input form-input-animated w-full p-3 rounded focus:outline-none resize-none"
                   rows="3"
                   maxLength={300}
                 />
@@ -743,8 +743,8 @@ function App() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tasks.map(task => (
-                    <div key={task.id} className="card-enhanced p-6 rounded-lg">
+                  {tasks.map((task, index) => (
+                    <div key={task.id} className="task-card card-enhanced p-6 rounded-lg" style={{ animationDelay: `${index * 0.1}s` }}>
                       <h4 className="text-lg font-bold mb-2">{task.title}</h4>
                       {task.description && (
                         <p className="opacity-70 mb-4 text-sm">{task.description}</p>
@@ -754,7 +754,7 @@ function App() {
                         <span className="text-green-600 font-semibold">+{task.credits_reward} FC</span>
                         <button
                           onClick={() => completeTask(task.id)}
-                          className="btn-enhanced bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700"
+                          className="task-complete-btn bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700"
                         >
                           Complete
                         </button>
