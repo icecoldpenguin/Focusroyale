@@ -44,7 +44,8 @@ class FocusRoyaleAPITester:
         self.log("\n=== Testing User Management System ===")
         
         # Test 1: Create users with unique usernames
-        test_usernames = ["alice_focus", "bob_productivity", "charlie_zen"]
+        timestamp = int(time.time())
+        test_usernames = [f"alice_focus_{timestamp}", f"bob_productivity_{timestamp}", f"charlie_zen_{timestamp}"]
         
         for username in test_usernames:
             try:
