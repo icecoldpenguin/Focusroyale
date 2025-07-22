@@ -164,6 +164,24 @@ function App() {
     }
   };
 
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    
+    if (!newTask.title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
+
+    try {
+      await createTask(newTask.title, newTask.description);
+      setNewTask({ title: '', description: '' });
+      alert('Task created successfully!');
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      alert(error.response?.data?.detail || 'Failed to create task');
+    }
+  };
+
   const startFocusSession = async () => {
     if (!currentUser) return;
     
