@@ -366,7 +366,10 @@ function App() {
               </div>
               <div className="text-gray-300">{currentUser.credits} FC</div>
               <div className="text-sm text-gray-400">
-                Rate: {currentUser.credit_rate_multiplier.toFixed(1)}x
+                Effective Rate: {(socialRate.social_multiplier * currentUser.credit_rate_multiplier).toFixed(1)}x
+              </div>
+              <div className="text-xs text-gray-500">
+                Social: {socialRate.social_multiplier.toFixed(1)}x • Personal: {currentUser.credit_rate_multiplier.toFixed(1)}x
               </div>
             </div>
             {unreadNotifications.length > 0 && (
