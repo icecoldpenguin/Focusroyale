@@ -29,11 +29,13 @@ function App() {
   useEffect(() => {
     if (currentUser) {
       fetchTasks(); // Initial fetch when user logs in
+      fetchSocialRate(); // Initial fetch of social rate
       const interval = setInterval(() => {
         fetchActiveUsers();
         fetchUsers();
         fetchNotifications();
         fetchTasks();
+        fetchSocialRate();
       }, 3000);
 
       return () => clearInterval(interval);
