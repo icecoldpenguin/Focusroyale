@@ -590,8 +590,8 @@ function App() {
               <div className="card-enhanced p-6 rounded-lg">
                 <h3 className="text-lg font-semibold mb-3">Currently Focusing</h3>
                 <div className="space-y-2">
-                  {activeUsers.map(user => (
-                    <div key={user.id} className="activity-item flex justify-between items-center p-3 rounded">
+                  {activeUsers.map((user, index) => (
+                    <div key={user.id} className="active-user-item activity-item flex justify-between items-center p-3 rounded" style={{ animationDelay: `${index * 0.1}s` }}>
                       <span className="font-medium flex items-center">
                         {user.username}
                         {user.level > 1 && (
