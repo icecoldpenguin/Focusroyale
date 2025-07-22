@@ -88,6 +88,15 @@ function App() {
     }
   };
 
+  const fetchSocialRate = async () => {
+    try {
+      const response = await axios.get(`${API}/focus/social-rate`);
+      setSocialRate(response.data);
+    } catch (error) {
+      console.error('Failed to fetch social rate:', error);
+    }
+  };
+
   const createTask = async (title, description) => {
     if (!currentUser) return;
     
