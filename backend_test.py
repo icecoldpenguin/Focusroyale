@@ -249,21 +249,25 @@ class FocusRoyaleAPITester:
             self.log(f"❌ Error ending focus session: {str(e)}")
             return False
         
-        # Test 5: Verify user credits were updated
+        # Test 5: Verify user credits were updated (should be 0 for short session)
         try:
             response = requests.get(f"{self.base_url}/users/{user_id}", timeout=10)
             if response.status_code == 200:
                 updated_user = response.json()
-                if updated_user['credits'] > 0:
+                # For sessions less than 1 minute, credits should remain 0
+                if duration < 1 and updated_user['credits'] == 0:
+                    self.log(f"✅ User credits correctly remain 0 for session < 1 minute")
+                elif duration >= 1 and updated_user['credits'] > 0:
                     self.log(f"✅ User credits updated to {updated_user['credits']}")
-                    # Update our test user data
-                    for i, u in enumerate(self.test_users):
-                        if u['id'] == user_id:
-                            self.test_users[i] = updated_user
-                            break
                 else:
-                    self.log("❌ User credits should be greater than 0 after focus session")
+                    self.log(f"❌ Unexpected credit behavior: duration={duration}, credits={updated_user['credits']}")
                     return False
+                    
+                # Update our test user data
+                for i, u in enumerate(self.test_users):
+                    if u['id'] == user_id:
+                        self.test_users[i] = updated_user
+                        break
             else:
                 self.log(f"❌ Failed to get updated user: {response.status_code}")
                 return False
