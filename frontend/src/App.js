@@ -579,6 +579,16 @@ function App() {
     }
   };
 
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setShowUserProfile(true);
+  };
+
+  const handleUpdateUser = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    fetchUsers(); // Refresh users list
+  };
+
   if (!isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
