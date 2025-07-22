@@ -415,10 +415,20 @@ function App() {
               
               {!focusSession ? (
                 <div className="text-center">
-                  <p className="text-gray-600 mb-4">
-                    Ready to earn some Focus Credits (FC)? <br />
-                    <span className="text-sm text-gray-500">10 FC per hour • Rate: {currentUser.credit_rate_multiplier.toFixed(1)}x</span>
+                  <p className="text-gray-600 mb-2">
+                    Ready to earn some Focus Credits (FC)?
                   </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <div className="text-sm text-blue-800 font-semibold mb-1">
+                      Social Rate: {socialRate.social_multiplier.toFixed(1)}x ({socialRate.credits_per_hour} FC/hour)
+                    </div>
+                    <div className="text-xs text-blue-600">
+                      {socialRate.active_users_count} users focusing = {socialRate.social_multiplier.toFixed(1)}x multiplier
+                    </div>
+                    <div className="text-xs text-blue-600 mt-1">
+                      Your personal rate: {(socialRate.social_multiplier * currentUser.credit_rate_multiplier).toFixed(1)}x
+                    </div>
+                  </div>
                   <button
                     onClick={startFocusSession}
                     className="bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
@@ -434,7 +444,10 @@ function App() {
                       Started at {new Date(focusSession.start_time).toLocaleTimeString()}
                     </div>
                     <div className="text-sm text-green-600 mt-2">
-                      Earning {(10 * currentUser.credit_rate_multiplier).toFixed(1)} FC per hour
+                      Earning {(socialRate.social_multiplier * currentUser.credit_rate_multiplier * 10).toFixed(1)} FC per hour
+                    </div>
+                    <div className="text-xs text-green-600">
+                      Social: {socialRate.social_multiplier.toFixed(1)}x • Personal: {currentUser.credit_rate_multiplier.toFixed(1)}x
                     </div>
                   </div>
                   <button
