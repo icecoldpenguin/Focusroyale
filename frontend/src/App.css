@@ -1,38 +1,199 @@
+/* Focus Royale Custom Styles */
+
 .App {
-    text-align: center;
+  text-align: center;
 }
 
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+/* Focus session active indicator */
+.focusing-indicator {
+  background: linear-gradient(45deg, #10b981, #059669);
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
-.App-link {
-    color: #61dafb;
+/* Shop item hover effects */
+.shop-item:hover {
+  transform: translateY(-2px);
+  transition: transform 0.2s ease-in-out;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Leaderboard podium effects */
+.leaderboard-gold {
+  background: linear-gradient(135deg, #ffd700, #ffed4a);
+}
+
+.leaderboard-silver {
+  background: linear-gradient(135deg, #c0c0c0, #d1d5db);
+}
+
+.leaderboard-bronze {
+  background: linear-gradient(135deg, #cd7f32, #d97706);
+}
+
+/* Button hover effects */
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1f2937, #374151);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Sabotage item special styling */
+.sabotage-item {
+  border: 2px dashed #ef4444;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
+
+.sabotage-item:hover {
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-style: solid;
+}
+
+/* Boost item special styling */
+.boost-item {
+  border: 2px solid #10b981;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+.boost-item:hover {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+/* Activity feed styling */
+.activity-item {
+  transition: background-color 0.2s ease;
+}
+
+.activity-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Credits counter animation */
+.credits-counter {
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+/* Focus timer styles */
+.focus-timer-active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.focus-timer-inactive {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+/* Navigation active state */
+.nav-active {
+  border-bottom: 3px solid #000;
+  font-weight: 600;
+}
+
+/* Card shadows and hover effects */
+.card {
+  transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Loading states */
+.loading-spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #000;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-mobile {
+    grid-template-columns: 1fr;
+  }
+  
+  .nav-mobile {
+    flex-wrap: wrap;
+  }
+  
+  .text-mobile {
+    font-size: 0.875rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border {
+    border-width: 2px;
+  }
+  
+  .bg-gray-50 {
+    background-color: #ffffff;
+    border: 1px solid #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse {
+    animation: none;
+  }
+  
+  .focus-timer-active {
+    animation: none;
+  }
+  
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible styles for accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
 }
