@@ -215,8 +215,8 @@ class FocusRoyaleAPITester:
             return False
         
         # Test 4: Wait a bit and end session to test credit calculation
-        self.log("Waiting 3 seconds to simulate focus time...")
-        time.sleep(3)
+        self.log("Waiting 65 seconds to simulate focus time for proper credit calculation...")
+        time.sleep(65)
         
         try:
             response = requests.post(
