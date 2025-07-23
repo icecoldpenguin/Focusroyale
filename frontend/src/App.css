@@ -47,6 +47,219 @@ body {
   background-color: var(--bg-primary);
 }
 
+/* Mobile-First Responsive Design */
+@media (max-width: 768px) {
+  /* Header responsive */
+  .header-container {
+    padding: 1rem 0.75rem !important;
+  }
+  
+  .header-container .max-w-6xl {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .header-container h1 {
+    font-size: 1.5rem;
+  }
+  
+  .header-container .text-right {
+    text-align: center;
+    order: 2;
+  }
+  
+  .header-container .flex.items-center.space-x-6 {
+    order: 1;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  /* Navigation responsive */
+  .nav-container .flex.space-x-8 {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+  }
+  
+  .nav-tab {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem !important;
+    min-width: auto;
+  }
+  
+  /* Main content responsive */
+  .max-w-6xl {
+    padding: 1rem !important;
+  }
+  
+  /* Grid layouts responsive */
+  .grid.grid-cols-1.md\\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem;
+  }
+  
+  .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .grid.grid-cols-1.md\\:grid-cols-7 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .grid.grid-cols-1.lg\\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Cards responsive */
+  .card-enhanced {
+    margin: 0.5rem 0;
+    padding: 1rem !important;
+  }
+  
+  /* Forms responsive */
+  .form-animated input,
+  .form-animated textarea,
+  .form-animated select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  /* Shop items responsive */
+  .shop-item-animated {
+    margin-bottom: 1rem;
+  }
+  
+  /* Focus timer responsive */
+  .focus-timer-container {
+    padding: 1rem !important;
+  }
+  
+  /* Charts responsive */
+  .chart-container {
+    height: 200px !important;
+  }
+  
+  /* Modal responsive */
+  .modal-content {
+    margin: 1rem !important;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  /* Weekly planner responsive */
+  .grid.grid-cols-1.md\\:grid-cols-7 .card-enhanced {
+    margin-bottom: 1rem;
+  }
+  
+  /* Button responsive */
+  .btn-enhanced {
+    min-height: 44px; /* Touch target size */
+    font-size: 0.875rem;
+  }
+  
+  /* Stats cards responsive */
+  .stats-card {
+    padding: 0.75rem !important;
+  }
+  
+  .stats-card .text-2xl {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Login page responsive */
+  .login-card {
+    padding: 1.5rem !important;
+    margin: 1rem !important;
+  }
+  
+  .login-title {
+    font-size: 1.75rem !important;
+  }
+  
+  /* Dropdown responsive */
+  .custom-dropdown-menu {
+    max-height: 150px !important;
+  }
+  
+  /* Three.js background responsive */
+  .three-background canvas {
+    display: none !important; /* Hide 3D background on mobile for performance */
+  }
+  
+  /* Floating doodles responsive */
+  .floating-doodle {
+    font-size: 1rem !important;
+    opacity: 0.2 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small screens */
+  .header-container h1 {
+    font-size: 1.25rem;
+  }
+  
+  .nav-tab {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem !important;
+  }
+  
+  .max-w-6xl {
+    padding: 0.75rem !important;
+  }
+  
+  .card-enhanced {
+    padding: 0.75rem !important;
+  }
+  
+  .grid.grid-cols-1.md\\:grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .chart-container {
+    height: 150px !important;
+  }
+  
+  .login-card {
+    padding: 1rem !important;
+  }
+  
+  .stats-card .text-2xl {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* PWA Safe Area Support */
+@supports (padding: max(0px)) {
+  .App {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  
+  .header-container {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .btn-enhanced {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .nav-tab {
+    min-height: 44px;
+  }
+  
+  .clickable-username {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
 /* Locked Tab Styles */
 .locked-tab-content {
   position: relative;
@@ -84,6 +297,20 @@ body {
   font-weight: 600;
   color: var(--text-muted);
   margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .lock-icon {
+    font-size: 2.5rem;
+  }
+  
+  .lock-text {
+    font-size: 1.125rem;
+  }
+  
+  .lock-overlay {
+    padding: 1rem;
+  }
 }
 
 /* Chart Container Styles */
