@@ -16,11 +16,20 @@ import bcrypt
 # Load environment variables (optional for Railway)
 load_dotenv()
 
-# MongoDB connection
+# MongoDB connection with error handling
 mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 db_name = os.environ.get('DB_NAME', 'focus_royale')
-client = AsyncIOMotorClient(mongo_url)
-db = client[db_name]
+
+print(f"Connecting to MongoDB: {mongo_url}")
+print(f"Database name: {db_name}")
+
+try:
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[db_name]
+    print("MongoDB client created successfully")
+except Exception as e:
+    print(f"Error creating MongoDB client: {e}")
+    # Don't exit, let the app start and show error in health check
 
 # Create the main app without a prefix
 app = FastAPI()
