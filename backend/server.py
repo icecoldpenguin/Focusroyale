@@ -910,12 +910,13 @@ async def get_user_statistics(user_id: str):
 
 @api_router.post("/admin/reset-database")
 async def reset_database():
-    """Reset database - remove all users, sessions, purchases, notifications"""
+    """Reset database - remove all users, sessions, purchases, notifications, tasks, weekly tasks"""
     await db.users.delete_many({})
     await db.focus_sessions.delete_many({})
     await db.purchases.delete_many({})
     await db.notifications.delete_many({})
     await db.tasks.delete_many({})
+    await db.weekly_tasks.delete_many({})
     return {"message": "Database reset successfully"}
 
 @api_router.post("/init")
