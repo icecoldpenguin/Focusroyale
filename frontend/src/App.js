@@ -840,7 +840,12 @@ function App() {
                   {activeUsers.map((user, index) => (
                     <div key={user.id} className="active-user-item activity-item flex justify-between items-center p-3 rounded" style={{ animationDelay: `${index * 0.1}s` }}>
                       <span className="font-medium flex items-center">
-                        {user.username}
+                        <span 
+                          className="clickable-username"
+                          onClick={() => handleUserClick(user)}
+                        >
+                          {user.username}
+                        </span>
                         {user.level > 1 && (
                           <span className="ml-2 bg-yellow-400 text-black px-1.5 py-0.5 rounded text-xs">
                             L{user.level}
