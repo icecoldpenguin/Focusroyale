@@ -41,6 +41,8 @@ class User(BaseModel):
     current_session_start: Optional[datetime] = None
     active_effects: List[Dict[str, Any]] = []  # temporary effects like degression, ally tokens
     completed_tasks: int = 0
+    bio: str = ""
+    profile_picture: str = ""
 
 class UserRegister(BaseModel):
     username: str
