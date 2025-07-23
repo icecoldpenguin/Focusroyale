@@ -1117,6 +1117,21 @@ function App() {
           </div>
         )}
       </div>
+
+      {/* User Profile Modal */}
+      <UserProfileModal 
+        user={selectedUser} 
+        isOpen={showUserProfile} 
+        onClose={() => setShowUserProfile(false)} 
+      />
+
+      {/* User Settings Modal */}
+      <UserSettingsModal 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)}
+        currentUser={currentUser}
+        onUpdateUser={handleUpdateUser}
+      />
     </div>
   );
 }
