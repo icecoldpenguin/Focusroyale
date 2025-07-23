@@ -78,6 +78,201 @@ const FloatingDoodles = ({ darkMode }) => {
   );
 };
 
+// Custom User Dropdown Component for Shop
+const UserDropdown = ({ item, users, currentUser, onSelectUser, selectedUserId }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  
+  const availableUsers = users.filter(user => user.id !== currentUser.id);
+  
+  const handleUserSelect = (user) => {
+    setSelectedUser(user);
+    onSelectUser(user.id);
+    setIsOpen(false);
+  };
+
+  useEffect(() => {
+    if (selectedUserId) {
+      const user = availableUsers.find(u => u.id === selectedUserId);
+      setSelectedUser(user);
+    }
+  }, [selectedUserId, availableUsers]);
+
+  return (
+    <div className="relative mb-3">
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        className={`custom-dropdown-trigger ${isOpen ? 'open' : ''}`}
+        style={{
+          backgroundColor: 'var(--bg-secondary)',
+          border: '2px solid var(--border-color)',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          position: 'relative'
+        }}
+      >
+        {selectedUser ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              {selectedUser.profile_picture ? (
+                <img 
+                  src={selectedUser.profile_picture} 
+                  alt={selectedUser.username}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                  style={{ 
+                    backgroundColor: 'var(--accent-color)', 
+                    color: 'var(--bg-primary)' 
+                  }}
+                >
+                  {selectedUser.username.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  {selectedUser.username}
+                </div>
+                <div className="text-xs flex items-center space-x-2" style={{ color: 'var(--text-muted)' }}>
+                  <span>{selectedUser.credits} FC</span>
+                  {selectedUser.level > 1 && (
+                    <span className="bg-yellow-500 text-black px-1.5 py-0.5 rounded text-xs">
+                      L{selectedUser.level}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div 
+              className={`dropdown-arrow ${isOpen ? 'rotate-180' : ''}`}
+              style={{ 
+                transition: 'transform 0.3s ease',
+                color: 'var(--text-secondary)'
+              }}
+            >
+              ▼
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span style={{ color: 'var(--text-muted)' }}>Select target user</span>
+            <div 
+              className={`dropdown-arrow ${isOpen ? 'rotate-180' : ''}`}
+              style={{ 
+                transition: 'transform 0.3s ease',
+                color: 'var(--text-secondary)'
+              }}
+            >
+              ▼
+            </div>
+          </div>
+        )}
+      </div>
+
+      {isOpen && (
+        <div 
+          className="custom-dropdown-menu"
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            backgroundColor: 'var(--bg-secondary)',
+            border: '2px solid var(--border-color)',
+            borderRadius: '8px',
+            marginTop: '4px',
+            zIndex: 1000,
+            maxHeight: '200px',
+            overflowY: 'auto',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            animation: 'slideIn 0.2s ease-out'
+          }}
+        >
+          {availableUsers.length === 0 ? (
+            <div 
+              className="px-4 py-3 text-center"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              No other users available
+            </div>
+          ) : (
+            availableUsers.map((user, index) => (
+              <div
+                key={user.id}
+                onClick={() => handleUserSelect(user)}
+                className="custom-dropdown-item"
+                style={{
+                  padding: '12px 16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  borderBottom: index < availableUsers.length - 1 ? '1px solid var(--border-color)' : 'none',
+                  animation: `slideIn 0.3s ease-out ${index * 0.05}s both`
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--bg-tertiary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                }}
+              >
+                <div className="flex items-center space-x-3">
+                  {user.profile_picture ? (
+                    <img 
+                      src={user.profile_picture} 
+                      alt={user.username}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+                      style={{ 
+                        backgroundColor: 'var(--accent-color)', 
+                        color: 'var(--bg-primary)' 
+                      }}
+                    >
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      {user.username}
+                    </div>
+                    <div className="text-sm flex items-center justify-between">
+                      <div className="flex items-center space-x-2" style={{ color: 'var(--text-muted)' }}>
+                        <span>{user.credits} FC</span>
+                        {user.level > 1 && (
+                          <span className="bg-yellow-500 text-black px-2 py-0.5 rounded text-xs font-bold">
+                            Level {user.level}
+                          </span>
+                        )}
+                      </div>
+                      {user.is_focusing && (
+                        <span 
+                          className="text-xs px-2 py-1 rounded-full"
+                          style={{ 
+                            backgroundColor: 'var(--accent-color)', 
+                            color: 'var(--bg-primary)' 
+                          }}
+                        >
+                          🎯 Focusing
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Theme Toggle Component
 const ThemeToggle = () => {
   const { darkMode, toggleTheme } = useTheme();
