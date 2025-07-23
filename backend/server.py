@@ -183,7 +183,8 @@ async def calculate_effective_credit_rate(user_data: dict) -> float:
     for effect in active_effects:
         if effect.get("expires_at") and datetime.fromisoformat(effect["expires_at"]) > current_time:
             if effect["type"] == "degression":
-                effective_rate -= effect.get("rate_reduction", 0.5)
+                # Halve the effective rate instead of subtracting
+                effective_rate = effective_rate * 0.5
             elif effect["type"] == "ally_boost":
                 effective_rate += effect.get("rate_boost", 1.0)
     
