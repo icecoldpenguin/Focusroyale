@@ -1091,38 +1091,43 @@ function App() {
                   
                   {item.requires_target ? (
                     <div>
-                      <select 
-                        id={`target-${item.id}`}
-                        className="custom-select w-full mb-3"
-                        defaultValue=""
-                      >
-                        <option value="" disabled>Select target user</option>
-                        {users.filter(user => user.id !== currentUser.id).map(user => (
-                          <option key={user.id} value={user.id}>
-                            {user.username} ({user.credits} FC) L{user.level}
-                          </option>
-                        ))}
-                      </select>
+                      <UserDropdown
+                        item={item}
+                        users={users}
+                        currentUser={currentUser}
+                        selectedUserId={selectedTargetUsers[item.id]}
+                        onSelectUser={(userId) => {
+                          setSelectedTargetUsers(prev => ({
+                            ...prev,
+                            [item.id]: userId
+                          }));
+                        }}
+                      />
                       <button
                         onClick={() => {
-                          const targetSelect = document.getElementById(`target-${item.id}`);
-                          const targetUserId = targetSelect.value;
+                          const targetUserId = selectedTargetUsers[item.id];
                           if (targetUserId) {
                             purchaseItem(item.id, targetUserId);
+                            // Clear selection after purchase
+                            setSelectedTargetUsers(prev => ({
+                              ...prev,
+                              [item.id]: null
+                            }));
                           } else {
                             alert('Please select a target user');
                           }
                         }}
-                        disabled={currentUser.credits < item.price}
-                        className={`btn-enhanced w-full py-2 px-4 rounded font-semibold text-white ${
-                          currentUser.credits < item.price 
-                            ? 'bg-gray-400 cursor-not-allowed' 
+                        disabled={currentUser.credits < item.price || !selectedTargetUsers[item.id]}
+                        className={`btn-enhanced w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 ${
+                          currentUser.credits < item.price || !selectedTargetUsers[item.id]
+                            ? 'bg-gray-400 cursor-not-allowed opacity-60' 
                             : item.item_type === 'sabotage' 
-                            ? 'bg-red-600 hover:bg-red-700'
-                            : 'bg-blue-600 hover:bg-blue-700'
+                            ? 'bg-red-600 hover:bg-red-700 hover:scale-105'
+                            : 'bg-blue-600 hover:bg-blue-700 hover:scale-105'
                         }`}
                       >
-                        {currentUser.credits < item.price ? 'Insufficient FC' : 'Use Pass'}
+                        {currentUser.credits < item.price ? 'Insufficient FC' : 
+                         !selectedTargetUsers[item.id] ? 'Select Target' : 'Use Pass'}
                       </button>
                     </div>
                   ) : (
