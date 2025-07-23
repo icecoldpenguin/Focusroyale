@@ -2,6 +2,31 @@ import React, { useState, useEffect, createContext, useContext } from "react";
 import "./App.css";
 import axios from "axios";
 import ThreeBackground from "./ThreeBackground";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+} from 'chart.js';
+import { Bar, Pie, Line } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement
+);
 
 // Theme Context
 const ThemeContext = createContext();
@@ -35,6 +60,22 @@ const ThemeProvider = ({ children }) => {
         {children}
       </div>
     </ThemeContext.Provider>
+  );
+};
+
+// Theme Toggle Component
+const ThemeToggle = () => {
+  const { darkMode, toggleTheme } = useTheme();
+  
+  return (
+    <button
+      onClick={toggleTheme}
+      className="theme-toggle-btn btn-enhanced p-2 rounded-lg transition-all duration-300"
+      style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
+      title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
+    >
+      {darkMode ? '☀️' : '🌙'}
+    </button>
   );
 };
 
@@ -75,6 +116,19 @@ const FloatingDoodles = ({ darkMode }) => {
         </div>
       ))}
     </>
+  );
+};
+
+// Locked Tab Component
+const LockedTabContent = ({ requiredLevel }) => {
+  return (
+    <div className="locked-tab-content">
+      <div className="locked-background"></div>
+      <div className="lock-overlay">
+        <div className="lock-icon">🔒</div>
+        <div className="lock-text">Unlocks at level {requiredLevel}</div>
+      </div>
+    </div>
   );
 };
 
@@ -204,13 +258,10 @@ const UserDropdown = ({ item, users, currentUser, onSelectUser, selectedUserId }
               <div
                 key={user.id}
                 onClick={() => handleUserSelect(user)}
-                className="custom-dropdown-item"
+                className="dropdown-item flex items-center space-x-3 px-4 py-3 cursor-pointer transition-all duration-200"
                 style={{
-                  padding: '12px 16px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
                   borderBottom: index < availableUsers.length - 1 ? '1px solid var(--border-color)' : 'none',
-                  animation: `slideIn 0.3s ease-out ${index * 0.05}s both`
+                  backgroundColor: 'transparent'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.backgroundColor = 'var(--bg-tertiary)';
@@ -219,49 +270,34 @@ const UserDropdown = ({ item, users, currentUser, onSelectUser, selectedUserId }
                   e.target.style.backgroundColor = 'transparent';
                 }}
               >
-                <div className="flex items-center space-x-3">
-                  {user.profile_picture ? (
-                    <img 
-                      src={user.profile_picture} 
-                      alt={user.username}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                      style={{ 
-                        backgroundColor: 'var(--accent-color)', 
-                        color: 'var(--bg-primary)' 
-                      }}
-                    >
-                      {user.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                      {user.username}
-                    </div>
-                    <div className="text-sm flex items-center justify-between">
-                      <div className="flex items-center space-x-2" style={{ color: 'var(--text-muted)' }}>
-                        <span>{user.credits} FC</span>
-                        {user.level > 1 && (
-                          <span className="bg-yellow-500 text-black px-2 py-0.5 rounded text-xs font-bold">
-                            Level {user.level}
-                          </span>
-                        )}
-                      </div>
-                      {user.is_focusing && (
-                        <span 
-                          className="text-xs px-2 py-1 rounded-full"
-                          style={{ 
-                            backgroundColor: 'var(--accent-color)', 
-                            color: 'var(--bg-primary)' 
-                          }}
-                        >
-                          🎯 Focusing
-                        </span>
-                      )}
-                    </div>
+                {user.profile_picture ? (
+                  <img 
+                    src={user.profile_picture} 
+                    alt={user.username}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div 
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                    style={{ 
+                      backgroundColor: 'var(--accent-color)', 
+                      color: 'var(--bg-primary)' 
+                    }}
+                  >
+                    {user.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <div className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {user.username}
+                  </div>
+                  <div className="text-xs flex items-center space-x-2" style={{ color: 'var(--text-muted)' }}>
+                    <span>{user.credits} FC</span>
+                    {user.level > 1 && (
+                      <span className="bg-yellow-400 text-black px-1.5 py-0.5 rounded text-xs">
+                        L{user.level}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -273,123 +309,135 @@ const UserDropdown = ({ item, users, currentUser, onSelectUser, selectedUserId }
   );
 };
 
-// Theme Toggle Component
-const ThemeToggle = () => {
-  const { darkMode, toggleTheme } = useTheme();
-  
-  return (
-    <div
-      className={`theme-toggle ${darkMode ? 'dark' : ''}`}
-      onClick={toggleTheme}
-      title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
-    />
-  );
-};
-
-// User Profile Modal Component
+// User Profile Modal
 const UserProfileModal = ({ user, isOpen, onClose }) => {
   if (!isOpen || !user) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content profile-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="avatar-container">
+    <div 
+      className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="modal-content card-enhanced p-6 rounded-lg max-w-md w-full mx-4 relative"
+        onClick={(e) => e.stopPropagation()}
+        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-2xl opacity-70 hover:opacity-100"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          ×
+        </button>
+        
+        <div className="text-center mb-6">
           {user.profile_picture ? (
-            <img src={user.profile_picture} alt={user.username} className="avatar-img" />
+            <img 
+              src={user.profile_picture} 
+              alt={user.username}
+              className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+            />
           ) : (
-            <div className="default-avatar">
+            <div 
+              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl font-bold"
+              style={{ 
+                backgroundColor: 'var(--accent-color)', 
+                color: 'var(--bg-primary)' 
+              }}
+            >
               {user.username.charAt(0).toUpperCase()}
             </div>
           )}
+          
+          <h2 className="text-2xl font-bold flex items-center justify-center">
+            {user.username}
+            {user.level > 1 && (
+              <span className="ml-2 bg-yellow-500 text-black px-2 py-1 rounded text-sm">
+                L{user.level}
+              </span>
+            )}
+          </h2>
+          
+          {user.bio && (
+            <p className="text-sm opacity-80 mt-2">{user.bio}</p>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="stats-item text-center p-3 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-xl font-bold">{user.credits}</div>
+              <div className="text-sm opacity-70">Focus Credits</div>
+            </div>
+            <div className="stats-item text-center p-3 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-xl font-bold">{user.total_focus_time}</div>
+              <div className="text-sm opacity-70">Minutes Focused</div>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="stats-item text-center p-3 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-xl font-bold">{user.credit_rate_multiplier.toFixed(1)}x</div>
+              <div className="text-sm opacity-70">Credit Rate</div>
+            </div>
+            <div className="stats-item text-center p-3 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+              <div className="text-xl font-bold">{user.completed_tasks || 0}</div>
+              <div className="text-sm opacity-70">Tasks Done</div>
+            </div>
+          </div>
         </div>
         
-        <h2 className="text-2xl font-bold mt-4 mb-2" style={{ color: 'var(--text-primary)' }}>
-          {user.username}
-        </h2>
-        
-        {user.level > 1 && (
-          <div className="mb-4">
-            <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-sm font-bold">
-              Level {user.level}
-            </span>
-          </div>
-        )}
-        
-        {user.bio && (
-          <div className="bio-display">
-            <p style={{ color: 'var(--text-secondary)' }}>{user.bio}</p>
-          </div>
-        )}
-        
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{user.credits}</div>
-            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Focus Credits</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{user.total_focus_time}</div>
-            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Minutes Focused</div>
-          </div>
+        <div className="mt-6 text-center">
+          <button
+            onClick={onClose}
+            className="btn-enhanced px-6 py-2 rounded-lg"
+            style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
+          >
+            Close
+          </button>
         </div>
-        
-        <button
-          onClick={onClose}
-          className="btn-enhanced mt-6 px-6 py-2 rounded-lg"
-          style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
-        >
-          Close
-        </button>
       </div>
     </div>
   );
 };
 
-// User Settings Modal Component  
+// User Settings Modal
 const UserSettingsModal = ({ isOpen, onClose, currentUser, onUpdateUser }) => {
   const [settings, setSettings] = useState({
     username: '',
+    bio: '',
+    profilePicture: '',
     currentPassword: '',
     newPassword: '',
-    confirmPassword: '',
-    bio: '',
-    profile_picture: ''
+    confirmPassword: ''
   });
 
   useEffect(() => {
-    if (currentUser) {
-      setSettings(prev => ({
-        ...prev,
+    if (currentUser && isOpen) {
+      setSettings({
         username: currentUser.username || '',
         bio: currentUser.bio || '',
-        profile_picture: currentUser.profile_picture || ''
-      }));
+        profilePicture: currentUser.profile_picture || '',
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
     }
-  }, [currentUser]);
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setSettings(prev => ({ ...prev, profile_picture: e.target.result }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  }, [currentUser, isOpen]);
 
   const handleSaveSettings = async () => {
-    try {
-      // Validate passwords if changing
-      if (settings.newPassword && settings.newPassword !== settings.confirmPassword) {
-        alert('New passwords do not match');
-        return;
-      }
+    if (settings.newPassword && settings.newPassword !== settings.confirmPassword) {
+      alert('New passwords do not match');
+      return;
+    }
 
+    try {
       const updateData = {
         user_id: currentUser.id,
-        username: settings.username.trim(),
-        bio: settings.bio.trim(),
-        profile_picture: settings.profile_picture
+        username: settings.username,
+        bio: settings.bio,
+        profile_picture: settings.profilePicture
       };
 
       if (settings.currentPassword && settings.newPassword) {
@@ -410,36 +458,39 @@ const UserSettingsModal = ({ isOpen, onClose, currentUser, onUpdateUser }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content settings-modal" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
-          User Settings
-        </h2>
+    <div 
+      className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={onClose}
+    >
+      <div 
+        className="modal-content card-enhanced p-6 rounded-lg max-w-md w-full mx-4 relative max-h-screen overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-2xl opacity-70 hover:opacity-100"
+          style={{ color: 'var(--text-primary)' }}
+        >
+          ×
+        </button>
         
-        <div className="settings-section">
-          <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Profile Picture</h3>
-          <div className="text-center">
-            {settings.profile_picture ? (
-              <img src={settings.profile_picture} alt="Profile" className="avatar-img mx-auto mb-4" />
-            ) : (
-              <div className="default-avatar mx-auto mb-4">
-                {settings.username.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="file-upload">
-              <input type="file" accept="image/*" onChange={handleImageUpload} />
-              Choose Image
-            </div>
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold mb-6">Settings</h2>
 
-        <div className="settings-section">
-          <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Profile Info</h3>
+        <div className="settings-section mb-6">
+          <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Profile Information</h3>
           <input
             type="text"
             placeholder="Username"
             value={settings.username}
             onChange={(e) => setSettings(prev => ({ ...prev, username: e.target.value }))}
+            className="form-input form-input-animated w-full p-3 rounded mb-4"
+          />
+          <input
+            type="text"
+            placeholder="Profile Picture URL (optional)"
+            value={settings.profilePicture}
+            onChange={(e) => setSettings(prev => ({ ...prev, profilePicture: e.target.value }))}
             className="form-input form-input-animated w-full p-3 rounded mb-4"
           />
           <textarea
@@ -505,6 +556,7 @@ function App() {
   const [activeUsers, setActiveUsers] = useState([]);
   const [shopItems, setShopItems] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [weeklyTasks, setWeeklyTasks] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [focusSession, setFocusSession] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -512,11 +564,26 @@ function App() {
   const [authMode, setAuthMode] = useState('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '' });
   const [newTask, setNewTask] = useState({ title: '', description: '' });
+  const [newWeeklyTask, setNewWeeklyTask] = useState({ title: '', description: '', tags: [], dayOfWeek: 0 });
   const [socialRate, setSocialRate] = useState({ active_users_count: 0, social_multiplier: 1.0, credits_per_hour: 10 });
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedTargetUsers, setSelectedTargetUsers] = useState({}); // Track selected users for each shop item
+  const [statistics, setStatistics] = useState(null);
+  const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+
+  // Get tab requirements
+  const getTabRequirements = (tab) => {
+    switch (tab) {
+      case 'statistics':
+        return { requiredLevel: 3, unlocked: currentUser?.level >= 3 };
+      case 'weekly-planner':
+        return { requiredLevel: 5, unlocked: currentUser?.level >= 5 };
+      default:
+        return { requiredLevel: 1, unlocked: true };
+    }
+  };
 
   // beforeunload handler to prevent tab close during active focus session
   useEffect(() => {
@@ -546,18 +613,21 @@ function App() {
   useEffect(() => {
     if (currentUser) {
       fetchTasks();
+      fetchWeeklyTasks();
       fetchSocialRate();
+      fetchStatistics();
       const interval = setInterval(() => {
         fetchActiveUsers();
         fetchUsers();
         fetchNotifications();
         fetchTasks();
+        fetchWeeklyTasks();
         fetchSocialRate();
       }, 3000);
 
       return () => clearInterval(interval);
     }
-  }, [currentUser]);
+  }, [currentUser, currentWeekOffset]);
 
   const initializeData = async () => {
     try {
@@ -607,12 +677,32 @@ function App() {
     }
   };
 
+  const fetchWeeklyTasks = async () => {
+    if (!currentUser) return;
+    try {
+      const response = await axios.get(`${API}/weekly-tasks/${currentUser.id}?week_offset=${currentWeekOffset}`);
+      setWeeklyTasks(response.data);
+    } catch (error) {
+      console.error('Failed to fetch weekly tasks:', error);
+    }
+  };
+
   const fetchSocialRate = async () => {
     try {
       const response = await axios.get(`${API}/focus/social-rate`);
       setSocialRate(response.data);
     } catch (error) {
       console.error('Failed to fetch social rate:', error);
+    }
+  };
+
+  const fetchStatistics = async () => {
+    if (!currentUser) return;
+    try {
+      const response = await axios.get(`${API}/statistics/${currentUser.id}`);
+      setStatistics(response.data);
+    } catch (error) {
+      console.error('Failed to fetch statistics:', error);
     }
   };
 
@@ -630,6 +720,26 @@ function App() {
       return response.data;
     } catch (error) {
       console.error('Failed to create task:', error);
+      throw error;
+    }
+  };
+
+  const createWeeklyTask = async (title, description, tags, dayOfWeek) => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await axios.post(`${API}/weekly-tasks`, {
+        user_id: currentUser.id,
+        title: title.trim(),
+        description: description.trim(),
+        tags: tags,
+        day_of_week: dayOfWeek
+      });
+      
+      await fetchWeeklyTasks();
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create weekly task:', error);
       throw error;
     }
   };
@@ -664,6 +774,7 @@ function App() {
       await fetchUsers();
       await fetchNotifications();
       await fetchTasks();
+      await fetchWeeklyTasks();
       
     } catch (error) {
       console.error('Auth failed:', error);
@@ -693,6 +804,40 @@ function App() {
     }
   };
 
+  const completeWeeklyTask = async (taskId) => {
+    if (!currentUser) return;
+    
+    try {
+      const response = await axios.post(`${API}/weekly-tasks/complete`, {
+        user_id: currentUser.id,
+        task_id: taskId
+      });
+      
+      const updatedUser = await axios.get(`${API}/users/${currentUser.id}`);
+      setCurrentUser(updatedUser.data);
+      
+      await fetchUsers();
+      await fetchWeeklyTasks();
+      
+      alert(`Weekly task completed! You earned ${response.data.credits_earned} credits.`);
+    } catch (error) {
+      console.error('Failed to complete weekly task:', error);
+      alert(error.response?.data?.detail || 'Failed to complete weekly task');
+    }
+  };
+
+  const deleteWeeklyTask = async (taskId) => {
+    if (!currentUser) return;
+    
+    try {
+      await axios.delete(`${API}/weekly-tasks/${taskId}?user_id=${currentUser.id}`);
+      await fetchWeeklyTasks();
+    } catch (error) {
+      console.error('Failed to delete weekly task:', error);
+      alert(error.response?.data?.detail || 'Failed to delete weekly task');
+    }
+  };
+
   const handleCreateTask = async (e) => {
     e.preventDefault();
     
@@ -708,6 +853,29 @@ function App() {
     } catch (error) {
       console.error('Failed to create task:', error);
       alert(error.response?.data?.detail || 'Failed to create task');
+    }
+  };
+
+  const handleCreateWeeklyTask = async (e) => {
+    e.preventDefault();
+    
+    if (!newWeeklyTask.title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
+
+    try {
+      await createWeeklyTask(
+        newWeeklyTask.title, 
+        newWeeklyTask.description, 
+        newWeeklyTask.tags,
+        newWeeklyTask.dayOfWeek
+      );
+      setNewWeeklyTask({ title: '', description: '', tags: [], dayOfWeek: 0 });
+      alert('Weekly task created successfully!');
+    } catch (error) {
+      console.error('Failed to create weekly task:', error);
+      alert(error.response?.data?.detail || 'Failed to create weekly task');
     }
   };
 
@@ -740,6 +908,7 @@ function App() {
       
       await fetchActiveUsers();
       await fetchUsers();
+      await fetchStatistics();
       
       alert(`Session ended! You earned ${response.data.credits_earned} credits in ${response.data.duration_minutes} minutes (Rate: ${response.data.effective_rate.toFixed(1)}x).`);
     } catch (error) {
@@ -784,6 +953,54 @@ function App() {
     setCurrentUser(updatedUser);
     fetchUsers(); // Refresh users list
   };
+
+  const handleTabClick = (tab) => {
+    const requirements = getTabRequirements(tab);
+    if (requirements.unlocked) {
+      setActiveTab(tab);
+      if (tab === 'statistics') {
+        fetchStatistics();
+      }
+    }
+  };
+
+  // Chart configurations
+  const getChartOptions = () => ({
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          color: 'var(--text-primary)'
+        }
+      },
+      tooltip: {
+        backgroundColor: 'var(--bg-secondary)',
+        titleColor: 'var(--text-primary)',
+        bodyColor: 'var(--text-primary)',
+        borderColor: 'var(--border-color)',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: 'var(--text-secondary)'
+        },
+        grid: {
+          color: 'var(--border-color)'
+        }
+      },
+      y: {
+        ticks: {
+          color: 'var(--text-secondary)'
+        },
+        grid: {
+          color: 'var(--border-color)'
+        }
+      }
+    }
+  });
 
   if (!isInitialized) {
     return (
@@ -876,6 +1093,16 @@ function App() {
 
   const unreadNotifications = notifications.filter(n => !n.is_read && n.user_id === currentUser.id);
 
+  const tabs = [
+    { id: 'dashboard', label: 'Dashboard', requiredLevel: 1 },
+    { id: 'shop', label: 'Shop', requiredLevel: 1 },
+    { id: 'tasks', label: 'Tasks', requiredLevel: 1 },
+    { id: 'statistics', label: 'Statistics', requiredLevel: 3 },
+    { id: 'weekly-planner', label: 'Weekly Planner', requiredLevel: 5 },
+    { id: 'leaderboard', label: 'Leaderboard', requiredLevel: 1 },
+    { id: 'activity', label: 'Activity', requiredLevel: 1 }
+  ];
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       {/* Header */}
@@ -934,23 +1161,30 @@ function App() {
       <nav className="nav-container border-b">
         <div className="max-w-6xl mx-auto">
           <div className="flex space-x-8">
-            {['dashboard', 'shop', 'tasks', 'leaderboard', 'activity'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`nav-tab nav-tab-animated py-3 px-4 border-b-2 transition-all capitalize ${
-                  activeTab === tab 
-                    ? 'active border-black font-semibold' 
-                    : 'border-transparent opacity-70 hover:opacity-100'
-                }`}
-                style={{
-                  borderColor: activeTab === tab ? 'var(--accent-color)' : 'transparent',
-                  color: 'var(--text-primary)'
-                }}
-              >
-                {tab}
-              </button>
-            ))}
+            {tabs.map(tab => {
+              const isUnlocked = currentUser.level >= tab.requiredLevel;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabClick(tab.id)}
+                  className={`nav-tab nav-tab-animated py-3 px-4 border-b-2 transition-all capitalize relative ${
+                    activeTab === tab.id 
+                      ? 'active border-black font-semibold' 
+                      : 'border-transparent opacity-70 hover:opacity-100'
+                  } ${!isUnlocked ? 'locked-tab' : ''}`}
+                  style={{
+                    borderColor: activeTab === tab.id ? 'var(--accent-color)' : 'transparent',
+                    color: isUnlocked ? 'var(--text-primary)' : 'var(--text-muted)',
+                    cursor: isUnlocked ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  {tab.label}
+                  {!isUnlocked && (
+                    <span className="ml-1 text-xs">🔒</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </nav>
@@ -1218,6 +1452,310 @@ function App() {
               )}
             </div>
           </div>
+        )}
+
+        {/* Statistics Tab */}
+        {activeTab === 'statistics' && (
+          currentUser.level >= 3 ? (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold">Study Statistics</h2>
+                <p className="opacity-70">Your focus and productivity insights</p>
+              </div>
+              
+              {statistics && (
+                <>
+                  {/* Overview Stats */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    {[
+                      { label: 'Total Focus Time', value: `${statistics.user_stats.total_focus_time} min` },
+                      { label: 'Total Credits', value: statistics.user_stats.total_credits },
+                      { label: 'Tasks Completed', value: statistics.user_stats.total_tasks_completed },
+                      { label: 'Current Level', value: statistics.user_stats.current_level }
+                    ].map((stat, index) => (
+                      <div key={index} className="stats-card card-enhanced p-4 rounded-lg text-center" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}>
+                        <div className="text-2xl font-bold">{stat.value}</div>
+                        <div className="opacity-80">{stat.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Charts Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Daily Focus Time Bar Chart */}
+                    <div className="card-enhanced p-6 rounded-lg">
+                      <h3 className="text-lg font-bold mb-4">Daily Focus Time (Last 30 Days)</h3>
+                      <div className="chart-container">
+                        <Bar
+                          data={{
+                            labels: Object.keys(statistics.daily_focus_time).slice(-7),
+                            datasets: [{
+                              label: 'Minutes Focused',
+                              data: Object.values(statistics.daily_focus_time).slice(-7),
+                              backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                              borderColor: 'rgba(59, 130, 246, 1)',
+                              borderWidth: 1
+                            }]
+                          }}
+                          options={getChartOptions()}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Task Completion Pie Chart */}
+                    <div className="card-enhanced p-6 rounded-lg">
+                      <h3 className="text-lg font-bold mb-4">Task Completion Breakdown</h3>
+                      <div className="chart-container">
+                        <Pie
+                          data={{
+                            labels: ['Regular Tasks', 'Weekly Tasks'],
+                            datasets: [{
+                              data: [
+                                statistics.user_stats.regular_tasks_completed,
+                                statistics.user_stats.weekly_tasks_completed
+                              ],
+                              backgroundColor: [
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(168, 85, 247, 0.8)'
+                              ],
+                              borderColor: [
+                                'rgba(34, 197, 94, 1)',
+                                'rgba(168, 85, 247, 1)'
+                              ],
+                              borderWidth: 2
+                            }]
+                          }}
+                          options={{
+                            responsive: true,
+                            plugins: {
+                              legend: {
+                                position: 'bottom',
+                                labels: {
+                                  color: 'var(--text-primary)'
+                                }
+                              },
+                              tooltip: {
+                                backgroundColor: 'var(--bg-secondary)',
+                                titleColor: 'var(--text-primary)',
+                                bodyColor: 'var(--text-primary)',
+                                borderColor: 'var(--border-color)',
+                                borderWidth: 1
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Weekly Progress Line Chart */}
+                    <div className="card-enhanced p-6 rounded-lg">
+                      <h3 className="text-lg font-bold mb-4">Weekly Progress</h3>
+                      <div className="chart-container">
+                        <Line
+                          data={{
+                            labels: statistics.weekly_breakdown.map(w => new Date(w.week_start).toLocaleDateString()),
+                            datasets: [
+                              {
+                                label: 'Focus Minutes',
+                                data: statistics.weekly_breakdown.map(w => w.focus_minutes),
+                                borderColor: 'rgba(34, 197, 94, 1)',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                              },
+                              {
+                                label: 'Credits Earned',
+                                data: statistics.weekly_breakdown.map(w => w.credits_earned),
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                              }
+                            ]
+                          }}
+                          options={getChartOptions()}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Credits Earned Bar Chart */}
+                    <div className="card-enhanced p-6 rounded-lg">
+                      <h3 className="text-lg font-bold mb-4">Daily Credits Earned</h3>
+                      <div className="chart-container">
+                        <Bar
+                          data={{
+                            labels: Object.keys(statistics.daily_credits).slice(-7),
+                            datasets: [{
+                              label: 'Credits Earned',
+                              data: Object.values(statistics.daily_credits).slice(-7),
+                              backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                              borderColor: 'rgba(168, 85, 247, 1)',
+                              borderWidth: 1
+                            }]
+                          }}
+                          options={getChartOptions()}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <LockedTabContent requiredLevel={3} />
+          )
+        )}
+
+        {/* Weekly Planner Tab */}
+        {activeTab === 'weekly-planner' && (
+          currentUser.level >= 5 ? (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold">Weekly Planner</h2>
+                <p className="opacity-70">Plan your tasks for each day of the week</p>
+              </div>
+
+              {/* Week Navigation */}
+              <div className="flex justify-center items-center space-x-4 mb-6">
+                <button
+                  onClick={() => setCurrentWeekOffset(currentWeekOffset - 1)}
+                  className="btn-enhanced px-4 py-2 rounded"
+                  style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                >
+                  ← Previous Week
+                </button>
+                <span className="font-semibold">
+                  {currentWeekOffset === 0 ? 'Current Week' : 
+                   currentWeekOffset > 0 ? `${currentWeekOffset} week${currentWeekOffset > 1 ? 's' : ''} ahead` :
+                   `${Math.abs(currentWeekOffset)} week${Math.abs(currentWeekOffset) > 1 ? 's' : ''} ago`}
+                </span>
+                <button
+                  onClick={() => setCurrentWeekOffset(currentWeekOffset + 1)}
+                  className="btn-enhanced px-4 py-2 rounded"
+                  style={{ backgroundColor: 'var(--bg-tertiary)' }}
+                >
+                  Next Week →
+                </button>
+              </div>
+              
+              {/* Task Creation Form */}
+              <div className="form-animated card-enhanced p-6 rounded-lg">
+                <h3 className="text-lg font-bold mb-4">Add New Weekly Task</h3>
+                <form onSubmit={handleCreateWeeklyTask} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Task title"
+                      value={newWeeklyTask.title}
+                      onChange={(e) => setNewWeeklyTask({...newWeeklyTask, title: e.target.value})}
+                      className="form-input form-input-animated w-full p-3 rounded focus:outline-none"
+                      maxLength={100}
+                    />
+                    <select
+                      value={newWeeklyTask.dayOfWeek}
+                      onChange={(e) => setNewWeeklyTask({...newWeeklyTask, dayOfWeek: parseInt(e.target.value)})}
+                      className="form-input form-input-animated w-full p-3 rounded focus:outline-none"
+                    >
+                      <option value={0}>Monday</option>
+                      <option value={1}>Tuesday</option>
+                      <option value={2}>Wednesday</option>
+                      <option value={3}>Thursday</option>
+                      <option value={4}>Friday</option>
+                      <option value={5}>Saturday</option>
+                      <option value={6}>Sunday</option>
+                    </select>
+                  </div>
+                  <textarea
+                    placeholder="Task description (optional)"
+                    value={newWeeklyTask.description}
+                    onChange={(e) => setNewWeeklyTask({...newWeeklyTask, description: e.target.value})}
+                    className="form-input form-input-animated w-full p-3 rounded focus:outline-none resize-none"
+                    rows="3"
+                    maxLength={300}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Tags (comma-separated, optional)"
+                    value={newWeeklyTask.tags.join(', ')}
+                    onChange={(e) => setNewWeeklyTask({
+                      ...newWeeklyTask, 
+                      tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag)
+                    })}
+                    className="form-input form-input-animated w-full p-3 rounded focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="btn-enhanced px-6 py-2 rounded-lg font-semibold"
+                    style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
+                  >
+                    Add Task
+                  </button>
+                </form>
+              </div>
+              
+              {/* Weekly Calendar */}
+              <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => {
+                  const dayTasks = weeklyTasks.filter(task => task.day_of_week === index);
+                  return (
+                    <div key={day} className="card-enhanced p-4 rounded-lg">
+                      <h3 className="font-bold mb-3 text-center" style={{ color: 'var(--accent-color)' }}>
+                        {day}
+                      </h3>
+                      <div className="space-y-2">
+                        {dayTasks.length === 0 ? (
+                          <p className="text-center text-sm opacity-60">No tasks</p>
+                        ) : (
+                          dayTasks.map((task, taskIndex) => (
+                            <div key={task.id} className={`task-card p-3 rounded text-sm border ${
+                              task.is_completed ? 'opacity-60 line-through' : ''
+                            }`} style={{ borderColor: 'var(--border-color)' }}>
+                              <div className="font-semibold mb-1">{task.title}</div>
+                              {task.description && (
+                                <div className="opacity-70 mb-2 text-xs">{task.description}</div>
+                              )}
+                              {task.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-2">
+                                  {task.tags.map((tag, i) => (
+                                    <span key={i} className="bg-blue-500 text-white px-1 py-0.5 rounded text-xs">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="flex justify-between items-center">
+                                <span className="text-green-600 font-semibold text-xs">+2 FC</span>
+                                <div className="flex space-x-1">
+                                  {!task.is_completed ? (
+                                    <button
+                                      onClick={() => completeWeeklyTask(task.id)}
+                                      className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700"
+                                    >
+                                      ✓
+                                    </button>
+                                  ) : (
+                                    <span className="text-green-600 text-xs">✓ Done</span>
+                                  )}
+                                  <button
+                                    onClick={() => deleteWeeklyTask(task.id)}
+                                    className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <LockedTabContent requiredLevel={5} />
+          )
         )}
 
         {/* Leaderboard Tab */}
