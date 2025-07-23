@@ -803,8 +803,8 @@ async def complete_weekly_task(input: WeeklyTaskComplete):
         }
     )
     
-    # Award credits (2 FC for weekly tasks to differentiate from regular tasks)
-    credits_earned = 2
+    # Award credits (10 FC for weekly tasks)
+    credits_earned = 10
     await db.users.update_one(
         {"id": input.user_id},
         {
