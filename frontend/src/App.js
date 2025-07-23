@@ -516,6 +516,7 @@ function App() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedTargetUsers, setSelectedTargetUsers] = useState({}); // Track selected users for each shop item
 
   // beforeunload handler to prevent tab close during active focus session
   useEffect(() => {
