@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-Focus Royale Backend API Test Suite - PERSONAL TASK SYSTEM & SHOP PASSES
-Tests the new personal task creation system and comprehensive shop pass functionality:
-- Personal Task Creation System (user-specific tasks)
-- Task Ownership and Completion (3 credits reward)
-- Shop Pass System (Level, Progression, Degression, Reset, Ally, Trade)
-- Targeting System and Credit Deduction
-- Temporary Effects and Rate Calculations
-- Activity Notifications and User Workflow
-- Authentication System (register/login)
-- Leaderboard (registered users only)
+Focus Royale Backend API Test Suite - USER UPDATE ENDPOINT FOCUS
+Tests the newly implemented user update endpoint and core app functionality:
+- NEW USER UPDATE ENDPOINT (Critical Priority):
+  * Username updates with uniqueness validation
+  * Bio updates  
+  * Profile picture updates (base64 format)
+  * Password changes with current password verification
+  * Error handling (user not found, username conflicts, incorrect passwords)
+- Basic App Health Check
+- Core Features Verification (authentication, focus sessions, social credit rate, shop/tasks)
 """
 
 import requests
