@@ -687,7 +687,6 @@ function App() {
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Focus Royale</h1>
           <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-6">
             <div className="text-right">
               <div className="text-lg font-semibold flex items-center">
                 <span 
@@ -732,6 +731,7 @@ function App() {
               Logout
             </button>
           </div>
+        </div>
         </div>
       </header>
 
