@@ -81,7 +81,7 @@ class Task(BaseModel):
     user_id: str  # Owner of the task
     title: str
     description: str
-    credits_reward: int = 3
+    credits_reward: int = 10
     is_active: bool = True
     is_completed: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
