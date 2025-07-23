@@ -9,32 +9,21 @@
       }
     },
     {
-      "src": "backend/server.py",
-      "use": "@vercel/python"
+      "src": "backend/vercel_app.py",
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.9"
+      }
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/server.py"
+      "dest": "backend/vercel_app.py"
     },
     {
       "src": "/(.*)",
       "dest": "frontend/$1"
     }
-  ],
-  "functions": {
-    "backend/server.py": {
-      "runtime": "python3.9"
-    }
-  },
-  "env": {
-    "MONGO_URL": "@mongo_url",
-    "DB_NAME": "@db_name"
-  },
-  "build": {
-    "env": {
-      "REACT_APP_BACKEND_URL": "https://your-app.vercel.app"
-    }
-  }
+  ]
 }
