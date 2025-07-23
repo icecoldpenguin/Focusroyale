@@ -944,6 +944,7 @@ async def reset_database():
     await db.weekly_tasks.delete_many({})
     return {"message": "Database reset successfully"}
 
+@api_router.get("/init")
 @api_router.post("/init")
 async def initialize_shop_items():
     """Initialize shop with new pass system"""
