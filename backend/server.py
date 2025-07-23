@@ -613,12 +613,12 @@ async def purchase_item(input: PurchaseRequest):
                 {"$set": {"credits": 0}}
             )
         
-        elif "rate_reduction" in effect:
-            # Degression Pass - temporary rate reduction
+        elif "rate_halved" in effect or "rate_reduction" in effect:
+            # Degression Pass - temporary rate halving effect
             expires_at = datetime.utcnow() + timedelta(hours=item.get("duration_hours", 24))
             degression_effect = {
                 "type": "degression",
-                "rate_reduction": effect["rate_reduction"],
+                "rate_halved": True,
                 "expires_at": expires_at.isoformat(),
                 "applied_by": input.user_id
             }
