@@ -741,6 +741,171 @@ async def mark_notification_read(notification_id: str):
     )
     return {"success": True}
 
+# ==================== WEEKLY PLANNER ENDPOINTS ====================
+
+@api_router.post("/weekly-tasks", response_model=WeeklyTask)
+async def create_weekly_task(input: WeeklyTaskCreate):
+    # Get current week start (Monday)
+    now = datetime.utcnow()
+    days_since_monday = now.weekday()
+    week_start = (now - timedelta(days=days_since_monday)).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    task = WeeklyTask(
+        **input.dict(),
+        week_start=week_start
+    )
+    await db.weekly_tasks.insert_one(task.dict())
+    return task
+
+@api_router.get("/weekly-tasks/{user_id}", response_model=List[WeeklyTask])
+async def get_user_weekly_tasks(user_id: str, week_offset: int = 0):
+    # Calculate week start based on offset (0 = current week, -1 = previous week, etc.)
+    now = datetime.utcnow()
+    days_since_monday = now.weekday()
+    current_week_start = (now - timedelta(days=days_since_monday)).replace(hour=0, minute=0, second=0, microsecond=0)
+    week_start = current_week_start + timedelta(weeks=week_offset)
+    week_end = week_start + timedelta(days=7)
+    
+    tasks = await db.weekly_tasks.find({
+        "user_id": user_id,
+        "week_start": {"$gte": week_start, "$lt": week_end}
+    }).to_list(1000)
+    
+    return [WeeklyTask(**task) for task in tasks]
+
+@api_router.post("/weekly-tasks/complete", response_model=Dict[str, Any])
+async def complete_weekly_task(input: WeeklyTaskComplete):
+    # Get user and task
+    user = await db.users.find_one({"id": input.user_id})
+    task = await db.weekly_tasks.find_one({"id": input.task_id})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not task:
+        raise HTTPException(status_code=404, detail="Weekly task not found")
+    
+    # Check if task belongs to user
+    if task["user_id"] != input.user_id:
+        raise HTTPException(status_code=403, detail="You can only complete your own tasks")
+    
+    # Check if task is already completed
+    if task.get("is_completed", False):
+        raise HTTPException(status_code=400, detail="Task is already completed")
+    
+    # Mark task as completed
+    await db.weekly_tasks.update_one(
+        {"id": input.task_id},
+        {
+            "$set": {
+                "is_completed": True,
+                "completed_at": datetime.utcnow()
+            }
+        }
+    )
+    
+    # Award credits (2 FC for weekly tasks to differentiate from regular tasks)
+    credits_earned = 2
+    await db.users.update_one(
+        {"id": input.user_id},
+        {
+            "$inc": {
+                "credits": credits_earned,
+                "completed_tasks": 1
+            }
+        }
+    )
+    
+    return {
+        "success": True,
+        "credits_earned": credits_earned,
+        "task_title": task["title"],
+        "total_credits": user["credits"] + credits_earned
+    }
+
+@api_router.delete("/weekly-tasks/{task_id}")
+async def delete_weekly_task(task_id: str, user_id: str):
+    # Check if task exists and belongs to user
+    task = await db.weekly_tasks.find_one({"id": task_id, "user_id": user_id})
+    if not task:
+        raise HTTPException(status_code=404, detail="Weekly task not found")
+    
+    await db.weekly_tasks.delete_one({"id": task_id})
+    return {"success": True}
+
+# ==================== STUDY STATISTICS ENDPOINTS ====================
+
+@api_router.get("/statistics/{user_id}", response_model=Dict[str, Any])
+async def get_user_statistics(user_id: str):
+    # Get user data
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Focus sessions data for last 30 days
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    focus_sessions = await db.focus_sessions.find({
+        "user_id": user_id,
+        "end_time": {"$gte": thirty_days_ago},
+        "is_active": False
+    }).sort("end_time", 1).to_list(1000)
+    
+    # Process daily focus time
+    daily_focus = {}
+    daily_credits = {}
+    for session in focus_sessions:
+        date_key = session["end_time"].strftime("%Y-%m-%d")
+        daily_focus[date_key] = daily_focus.get(date_key, 0) + session.get("duration_minutes", 0)
+        daily_credits[date_key] = daily_credits.get(date_key, 0) + session.get("credits_earned", 0)
+    
+    # Task completion data
+    regular_tasks_completed = await db.tasks.count_documents({
+        "user_id": user_id, 
+        "is_completed": True
+    })
+    
+    weekly_tasks_completed = await db.weekly_tasks.count_documents({
+        "user_id": user_id, 
+        "is_completed": True
+    })
+    
+    # Level progression (simplified - could be enhanced with level history)
+    current_level = user.get("level", 1)
+    
+    # Weekly breakdown for last 4 weeks
+    weekly_data = []
+    for week_offset in range(-3, 1):  # Last 4 weeks including current
+        week_start = datetime.utcnow() - timedelta(days=datetime.utcnow().weekday() + (3 - week_offset) * 7)
+        week_end = week_start + timedelta(days=7)
+        
+        week_sessions = [s for s in focus_sessions 
+                        if week_start <= s["end_time"] < week_end]
+        
+        week_focus_time = sum(s.get("duration_minutes", 0) for s in week_sessions)
+        week_credits = sum(s.get("credits_earned", 0) for s in week_sessions)
+        
+        weekly_data.append({
+            "week_start": week_start.strftime("%Y-%m-%d"),
+            "focus_minutes": week_focus_time,
+            "credits_earned": week_credits,
+            "sessions_count": len(week_sessions)
+        })
+    
+    return {
+        "user_stats": {
+            "total_focus_time": user.get("total_focus_time", 0),
+            "total_credits": user.get("credits", 0),
+            "current_level": current_level,
+            "credit_rate": user.get("credit_rate_multiplier", 1.0),
+            "regular_tasks_completed": regular_tasks_completed,
+            "weekly_tasks_completed": weekly_tasks_completed,
+            "total_tasks_completed": regular_tasks_completed + weekly_tasks_completed
+        },
+        "daily_focus_time": daily_focus,
+        "daily_credits": daily_credits,
+        "weekly_breakdown": weekly_data,
+        "recent_sessions_count": len(focus_sessions)
+    }
+
 # ==================== ADMIN/UTILITY ENDPOINTS ====================
 
 @api_router.post("/admin/reset-database")
