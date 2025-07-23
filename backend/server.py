@@ -11,6 +11,7 @@ import uuid
 import hashlib
 from datetime import datetime, timedelta
 import asyncio
+import bcrypt
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
