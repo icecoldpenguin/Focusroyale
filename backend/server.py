@@ -244,6 +244,57 @@ async def get_users():
         result.append(user_dict)
     return result
 
+@api_router.put("/users/update", response_model=Dict[str, Any])
+async def update_user(input: UserUpdate):
+    """Update user profile information including username, bio, profile picture, and password"""
+    # Check if user exists
+    user = await db.users.find_one({"id": input.user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    update_data = {}
+    
+    # Handle username update
+    if input.username and input.username.strip() != user.get('username'):
+        new_username = input.username.strip()
+        # Check if username is already taken by another user
+        existing_user = await db.users.find_one({"username": new_username, "id": {"$ne": input.user_id}})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Username already taken")
+        update_data["username"] = new_username
+    
+    # Handle bio update
+    if input.bio is not None:
+        update_data["bio"] = input.bio.strip()
+    
+    # Handle profile picture update
+    if input.profile_picture is not None:
+        update_data["profile_picture"] = input.profile_picture
+    
+    # Handle password update
+    if input.current_password and input.new_password:
+        # Verify current password
+        if not bcrypt.checkpw(input.current_password.encode('utf-8'), user['password_hash'].encode('utf-8')):
+            raise HTTPException(status_code=400, detail="Current password is incorrect")
+        
+        # Hash new password
+        new_password_hash = bcrypt.hashpw(input.new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        update_data["password_hash"] = new_password_hash
+    
+    # Update user in database
+    if update_data:
+        await db.users.update_one({"id": input.user_id}, {"$set": update_data})
+    
+    # Return updated user data
+    updated_user = await db.users.find_one({"id": input.user_id})
+    user_dict = dict(updated_user)
+    if '_id' in user_dict:
+        del user_dict['_id']
+    if 'password_hash' in user_dict:
+        del user_dict['password_hash']
+    
+    return {"message": "User updated successfully", "user": user_dict}
+
 @api_router.get("/users/{user_id}", response_model=Dict[str, Any])
 async def get_user(user_id: str):
     await clean_expired_effects()
