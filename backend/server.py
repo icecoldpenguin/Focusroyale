@@ -127,6 +127,29 @@ class TradeConsent(BaseModel):
     purchase_id: str
     consent: bool
 
+class WeeklyTask(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    title: str
+    description: str
+    tags: List[str] = []
+    day_of_week: int  # 0=Monday, 1=Tuesday, ..., 6=Sunday
+    week_start: datetime  # Start of the week this task belongs to
+    is_completed: bool = False
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    completed_at: Optional[datetime] = None
+
+class WeeklyTaskCreate(BaseModel):
+    user_id: str
+    title: str
+    description: str
+    tags: List[str] = []
+    day_of_week: int
+
+class WeeklyTaskComplete(BaseModel):
+    user_id: str
+    task_id: str
+
 class Notification(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
