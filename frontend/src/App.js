@@ -35,6 +35,9 @@ const useTheme = () => useContext(ThemeContext);
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+console.log('Backend URL:', BACKEND_URL);
+console.log('API URL:', API);
+
 // Theme Provider Component
 const ThemeProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(() => {
