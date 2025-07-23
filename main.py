@@ -25,6 +25,21 @@ db = client[db_name]
 # Create the main app without a prefix
 app = FastAPI()
 
+# Add root endpoint for healthcheck
+@app.get("/")
+async def root():
+    return {"message": "Focus Royale API is running!", "status": "healthy"}
+
+# Add health check endpoint
+@app.get("/health")
+async def health_check():
+    try:
+        # Test MongoDB connection
+        await client.admin.command('ping')
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
