@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 """
-Focus Royale Backend API Test Suite - USER UPDATE ENDPOINT FOCUS
-Tests the newly implemented user update endpoint and core app functionality:
-- NEW USER UPDATE ENDPOINT (Critical Priority):
-  * Username updates with uniqueness validation
-  * Bio updates  
-  * Profile picture updates (base64 format)
-  * Password changes with current password verification
-  * Error handling (user not found, username conflicts, incorrect passwords)
-- Basic App Health Check
-- Core Features Verification (authentication, focus sessions, social credit rate, shop/tasks)
+Focus Royale Backend API Test Suite - NEWLY IMPLEMENTED FEATURES
+Tests the newly implemented backend features as requested:
+1. **Degression Pass Fix**: Test that it now halves the effective rate instead of subtracting 0.5x
+2. **Weekly Tasks System**: Test POST/GET/DELETE weekly tasks endpoints and completion (2 FC reward)
+3. **Study Statistics System**: Test GET /api/statistics/{user_id} endpoint
+4. **Updated Shop Items**: Verify shop initialization includes updated degression pass description
 """
 
 import requests
