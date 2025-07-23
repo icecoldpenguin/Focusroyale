@@ -1,0 +1,41 @@
+{
+  "name": "focus-royale",
+  "version": "1.0.0",
+  "description": "Turn focus into currency. Strategy decides who rises.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"cd backend && uvicorn server:app --reload\" \"cd frontend && npm start\"",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && uvicorn server:app --host 0.0.0.0 --port 8001",
+    "install-deps": "cd backend && pip install -r requirements.txt && cd ../frontend && npm install",
+    "deploy:vercel": "chmod +x deploy-vercel.sh && ./deploy-vercel.sh",
+    "deploy:railway": "chmod +x deploy-railway.sh && ./deploy-railway.sh",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "test:backend": "cd backend && python -m pytest",
+    "test:frontend": "cd frontend && npm test",
+    "lint:backend": "cd backend && black . && isort . && flake8",
+    "lint:frontend": "cd frontend && npm run lint"
+  },
+  "keywords": [
+    "focus",
+    "productivity",
+    "gamification",
+    "credits",
+    "social",
+    "competition",
+    "fastapi",
+    "react",
+    "mongodb"
+  ],
+  "author": "Focus Royale Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
