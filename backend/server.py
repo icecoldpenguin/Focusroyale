@@ -515,7 +515,7 @@ async def complete_task(input: TaskComplete):
     )
     
     # Award credits and update user
-    credits_earned = task.get("credits_reward", 3)
+    credits_earned = task.get("credits_reward", 10)
     await db.users.update_one(
         {"id": input.user_id},
         {
