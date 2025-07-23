@@ -1724,7 +1724,7 @@ function App() {
                                 </div>
                               )}
                               <div className="flex justify-between items-center">
-                                <span className="text-green-600 font-semibold text-xs">+2 FC</span>
+                                <span className="text-green-600 font-semibold text-xs">+10 FC</span>
                                 <div className="flex space-x-1">
                                   {!task.is_completed ? (
                                     <button
