@@ -786,11 +786,11 @@ async def initialize_shop_items():
         {
             "id": str(uuid.uuid4()),
             "name": "Degression Pass",
-            "description": "Select someone → their credit rate is reduced by -0.5x for 24 hours",
+            "description": "Select someone → their credit rate is halved for 24 hours",
             "emoji": "💀",
             "price": 120,
             "item_type": "sabotage",
-            "effect": {"rate_reduction": 0.5},
+            "effect": {"rate_halved": True},
             "is_active": True,
             "requires_target": True,
             "duration_hours": 24
