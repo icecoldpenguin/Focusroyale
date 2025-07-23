@@ -634,12 +634,20 @@ function App() {
 
   const initializeData = async () => {
     try {
+      console.log('Initializing app data...');
+      console.log('API endpoint:', `${API}/init`);
+      
       await axios.post(`${API}/init`);
       await fetchShopItems();
       await fetchSocialRate();
       setIsInitialized(true);
+      console.log('App initialized successfully');
     } catch (error) {
       console.error('Failed to initialize:', error);
+      console.error('Error details:', error.response?.data);
+      
+      // Try to continue even if initialization fails
+      setIsInitialized(true);
     }
   };
 
