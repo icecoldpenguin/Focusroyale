@@ -1047,7 +1047,12 @@ function App() {
                       </div>
                       <div>
                         <div className="font-semibold flex items-center">
-                          {user.username}
+                          <span 
+                            className="clickable-username"
+                            onClick={() => handleUserClick(user)}
+                          >
+                            {user.username}
+                          </span>
                           {user.level > 1 && (
                             <span className="ml-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-bold">
                               L{user.level}
