@@ -732,7 +732,6 @@ function App() {
             </button>
           </div>
         </div>
-        </div>
       </header>
 
       {/* Navigation */}
