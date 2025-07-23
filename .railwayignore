@@ -1,0 +1,13 @@
+# Ignore frontend for Railway backend deployment
+frontend/
+*.log
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+node_modules/
+.DS_Store
