@@ -19,7 +19,7 @@ import uuid
 from datetime import datetime, timedelta
 
 # Backend URL from frontend/.env
-BASE_URL = "https://013410b5-5cd6-4738-a23a-5e5cd4ece3fd.preview.emergentagent.com/api"
+BASE_URL = "https://3b299981-2dfe-4c94-b40d-344f52c4182e.preview.emergentagent.com/api"
 
 class FocusRoyaleNewFeaturesAPITester:
     def __init__(self):
