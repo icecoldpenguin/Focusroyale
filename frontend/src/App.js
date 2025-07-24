@@ -1142,7 +1142,7 @@ function App() {
       showNotification(`Session ended! You earned ${response.data.credits_earned} credits in ${response.data.duration_minutes} minutes (Rate: ${response.data.effective_rate.toFixed(1)}x).`, 'success');
     } catch (error) {
       console.error('Failed to end focus session:', error);
-      alert(error.response?.data?.detail || 'Failed to end focus session');
+      showNotification(error.response?.data?.detail || 'Failed to end focus session', 'error');
     }
   };
 
