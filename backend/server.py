@@ -160,6 +160,25 @@ class Notification(BaseModel):
     is_read: bool = False
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
+class TradeRequest(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    requester_id: str
+    target_id: str
+    requester_credits: int
+    target_credits: int
+    status: str = "pending"  # "pending", "accepted", "rejected", "expired"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    expires_at: datetime = Field(default_factory=lambda: datetime.utcnow() + timedelta(hours=24))
+
+class TradeRequestCreate(BaseModel):
+    target_user_id: str
+    offered_credits: int
+    requested_credits: int
+
+class TradeResponse(BaseModel):
+    trade_request_id: str
+    response: str  # "accept" or "reject"
+
 # ==================== HELPER FUNCTIONS ====================
 
 def hash_password(password: str) -> str:
