@@ -950,7 +950,7 @@ function App() {
     e.preventDefault();
     
     if (!authForm.username.trim() || !authForm.password.trim()) {
-      alert('Please fill in all fields');
+      showNotification('Please fill in all fields', 'error');
       return;
     }
 
