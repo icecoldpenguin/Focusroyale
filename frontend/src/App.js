@@ -1112,6 +1112,8 @@ function App() {
         user_id: currentUser.id 
       });
       setFocusSession(response.data);
+      // Reset timer when starting new focus session
+      resetTimer();
       await fetchActiveUsers();
     } catch (error) {
       console.error('Failed to start focus session:', error);
