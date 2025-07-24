@@ -590,6 +590,80 @@ function App() {
     isSet: false
   });
 
+  // Notification system functions
+  const showNotification = (message, type = 'info') => {
+    const id = Date.now() + Math.random();
+    const notification = { id, message, type };
+    setAppNotifications(prev => [...prev, notification]);
+    
+    // Auto remove after 4 seconds
+    setTimeout(() => {
+      setAppNotifications(prev => prev.filter(n => n.id !== id));
+    }, 4000);
+  };
+
+  const removeNotification = (id) => {
+    setAppNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  // Timer functions
+  const setTimerDuration = (minutes) => {
+    setTimer(prev => ({
+      ...prev,
+      duration: minutes,
+      timeLeft: minutes * 60,
+      isRunning: false,
+      isSet: false
+    }));
+  };
+
+  const startTimer = () => {
+    setTimer(prev => ({ ...prev, isRunning: true, isSet: true }));
+  };
+
+  const pauseTimer = () => {
+    setTimer(prev => ({ ...prev, isRunning: false }));
+  };
+
+  const resetTimer = () => {
+    setTimer(prev => ({
+      ...prev,
+      timeLeft: prev.duration * 60,
+      isRunning: false,
+      isSet: false
+    }));
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Timer countdown effect
+  useEffect(() => {
+    let interval = null;
+    if (timer.isRunning && timer.timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimer(prev => {
+          if (prev.timeLeft <= 1) {
+            // Timer finished
+            // Play notification sound and show notification
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBWgcLbcmWwFcTCcbJOIFdQFpQyoT');
+            audio.play().catch(e => console.log('Audio play failed:', e));
+            
+            showNotification('⏰ Timer finished! Time to take a break.', 'success');
+            return { ...prev, timeLeft: 0, isRunning: false };
+          }
+          return { ...prev, timeLeft: prev.timeLeft - 1 };
+        });
+      }, 1000);
+    } else if (!timer.isRunning) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [timer.isRunning, timer.timeLeft]);
+
   // Get tab requirements
   const getTabRequirements = (tab) => {
     switch (tab) {
