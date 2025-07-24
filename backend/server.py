@@ -1719,6 +1719,180 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db_client():
+    """Initialize database on startup if needed"""
+    try:
+        # Check if shop_items collection is empty
+        shop_count = await db.shop_items.count_documents({})
+        
+        if shop_count == 0:
+            logger.info("Shop items collection is empty. Initializing with all passes...")
+            
+            # Initialize with all pass data (same as /init endpoint)
+            new_items = [
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Level Pass",
+                    "description": "Move up 1 Level (unlocks prestige perks, leaderboard advantage, or visual flex)",
+                    "emoji": "🎟️",
+                    "price": 100,
+                    "item_type": "level",
+                    "effect": {"level_increase": 1},
+                    "is_active": True,
+                    "requires_target": False
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Progression Pass",
+                    "description": "Increase your credit/hr rate by +0.5x permanently",
+                    "emoji": "⚡",
+                    "price": 80,
+                    "item_type": "boost",
+                    "effect": {"credit_rate_multiplier": 0.5},
+                    "is_active": True,
+                    "requires_target": False
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Degression Pass",
+                    "description": "Select someone → their credit rate is halved for 24 hours",
+                    "emoji": "💀",
+                    "price": 120,
+                    "item_type": "sabotage",
+                    "effect": {"rate_halved": True},
+                    "is_active": True,
+                    "requires_target": True,
+                    "duration_hours": 24
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Reset Pass",
+                    "description": "Reset another player's FC to 0 — yes, full wipeout. Use with caution (or pure rage)",
+                    "emoji": "🔥",
+                    "price": 500,
+                    "item_type": "sabotage",
+                    "effect": {"reset_credits": True},
+                    "is_active": True,
+                    "requires_target": True
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Ally Token",
+                    "description": "Forms a 'Focus Link' with a chosen player: both get +1x extra credit rate for 3 hours",
+                    "emoji": "🤝",
+                    "price": 60,
+                    "item_type": "special",
+                    "effect": {"ally_boost": 1.0},
+                    "is_active": True,
+                    "requires_target": True,
+                    "duration_hours": 3
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Trade Pass",
+                    "description": "Trade FC with another player (needs mutual consent)",
+                    "emoji": "🔄",
+                    "price": 50,
+                    "item_type": "special",
+                    "effect": {"trade_request": True},
+                    "is_active": True,
+                    "requires_target": True
+                },
+                # NEW ADVANCED PASSES
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Mirror Pass",
+                    "description": "Reflects the next pass used against you back to the original sender",
+                    "emoji": "🪞",
+                    "price": 250,
+                    "item_type": "defensive",
+                    "effect": {"mirror_shield": True},
+                    "is_active": True,
+                    "requires_target": False,
+                    "duration_hours": 24
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Dominance Pass",
+                    "description": "For 1 hour, all other players earn only 50% of their usual credits",
+                    "emoji": "👑",
+                    "price": 300,
+                    "item_type": "sabotage",
+                    "effect": {"global_dominance": True},
+                    "is_active": True,
+                    "requires_target": False,
+                    "duration_hours": 1
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Time Loop Pass",
+                    "description": "Instantly repeats your last hour's credit gain. Highly effective after group focus sessions",
+                    "emoji": "⏰",
+                    "price": 200,
+                    "item_type": "boost",
+                    "effect": {"time_loop": True},
+                    "is_active": True,
+                    "requires_target": False
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Immunity Pass",
+                    "description": "Grants complete immunity from all negative passes for 48 hours",
+                    "emoji": "🛡️",
+                    "price": 300,
+                    "item_type": "defensive",
+                    "effect": {"immunity_shield": True},
+                    "is_active": True,
+                    "requires_target": False,
+                    "duration_hours": 48
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Assassin Pass",
+                    "description": "Targeted player earns 0 credits for their next 3 tasks",
+                    "emoji": "🗡️",
+                    "price": 120,
+                    "item_type": "sabotage",
+                    "effect": {"assassin_curse": True, "tasks_affected": 3},
+                    "is_active": True,
+                    "requires_target": True,
+                    "duration_hours": 24
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Freeze Pass",
+                    "description": "Prevents the targeted player from using any passes for the next 12 hours",
+                    "emoji": "🧊",
+                    "price": 150,
+                    "item_type": "sabotage",
+                    "effect": {"freeze_passes": True},
+                    "is_active": True,
+                    "requires_target": True,
+                    "duration_hours": 12
+                },
+                {
+                    "id": str(uuid.uuid4()),
+                    "name": "Inversion Pass",
+                    "description": "Swaps your credit rate multiplier with another player for 60 minutes",
+                    "emoji": "🔀",
+                    "price": 180,
+                    "item_type": "special",
+                    "effect": {"inversion_swap": True},
+                    "is_active": True,
+                    "requires_target": True,
+                    "duration_hours": 1
+                }
+            ]
+            
+            await db.shop_items.insert_many(new_items)
+            logger.info(f"Successfully initialized {len(new_items)} shop items on startup")
+        else:
+            logger.info(f"Shop items already exist ({shop_count} items). Skipping initialization.")
+            
+    except Exception as e:
+        logger.error(f"Error during startup initialization: {e}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
