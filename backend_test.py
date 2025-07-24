@@ -321,40 +321,97 @@ class FocusRoyaleNewFeaturesAPITester:
         return True
     
     def test_tasks_system(self):
-        """Test NEW Tasks System (3 credits per completion)"""
-        self.log("\n=== Testing Tasks System (3 credits reward) ===")
+        """Test Personal Tasks System (10 credits per completion)"""
+        self.log("\n=== Testing Personal Tasks System ===")
         
         if not self.test_users:
             self.log("❌ No test users available for tasks testing")
             return False
         
-        # Test 1: Get available tasks
+        user = self.test_users[0]
+        user_id = user['id']
+        
+        # Test 1: Create a personal task
+        task_data = {
+            "user_id": user_id,
+            "title": "Complete Focus Royale Testing",
+            "description": "Test the task creation and completion system thoroughly"
+        }
+        
         try:
-            response = requests.get(f"{self.base_url}/tasks", timeout=10)
+            response = requests.post(
+                f"{self.base_url}/tasks",
+                json=task_data,
+                timeout=10
+            )
+            
             if response.status_code == 200:
-                self.test_tasks = response.json()
-                self.log(f"✅ Retrieved {len(self.test_tasks)} available tasks")
+                created_task = response.json()
+                self.log(f"✅ Created personal task: {created_task['title']}")
                 
-                if len(self.test_tasks) == 0:
-                    self.log("❌ No tasks available for testing")
+                # Verify task structure
+                required_fields = ['id', 'user_id', 'title', 'description', 'credits_reward', 'is_active', 'is_completed']
+                for field in required_fields:
+                    if field not in created_task:
+                        self.log(f"❌ Missing field '{field}' in created task")
+                        return False
+                
+                # Verify task belongs to user
+                if created_task['user_id'] != user_id:
+                    self.log(f"❌ Task user_id mismatch: expected {user_id}, got {created_task['user_id']}")
+                    return False
+                
+                # Verify default values
+                if created_task['credits_reward'] != 10:
+                    self.log(f"❌ Task should have 10 credits reward, got {created_task['credits_reward']}")
+                    return False
+                
+                if created_task['is_completed'] != False:
+                    self.log(f"❌ New task should not be completed")
+                    return False
+                
+                self.test_tasks.append(created_task)
+                
+            else:
+                self.log(f"❌ Failed to create task: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Error creating task: {str(e)}")
+            return False
+        
+        # Test 2: Get user's tasks
+        try:
+            response = requests.get(f"{self.base_url}/tasks/{user_id}", timeout=10)
+            if response.status_code == 200:
+                user_tasks = response.json()
+                self.log(f"✅ Retrieved {len(user_tasks)} tasks for user")
+                
+                # Verify our created task is in the list
+                task_found = False
+                for task in user_tasks:
+                    if task['id'] == created_task['id']:
+                        task_found = True
+                        break
+                
+                if not task_found:
+                    self.log("❌ Created task not found in user's task list")
                     return False
                 
             else:
-                self.log(f"❌ Failed to get tasks: {response.status_code}")
+                self.log(f"❌ Failed to get user tasks: {response.status_code}")
                 return False
         except Exception as e:
-            self.log(f"❌ Error getting tasks: {str(e)}")
+            self.log(f"❌ Error getting user tasks: {str(e)}")
             return False
         
-        # Test 2: Complete a task and verify 3 credits reward
-        user = self.test_users[0]
-        task = self.test_tasks[0]
+        # Test 3: Complete the task and verify credits reward
         original_credits = user.get('credits', 0)
         
         try:
             response = requests.post(
                 f"{self.base_url}/tasks/complete",
-                json={"user_id": user["id"], "task_id": task["id"]},
+                json={"user_id": user_id, "task_id": created_task['id']},
                 timeout=10
             )
             
@@ -362,17 +419,19 @@ class FocusRoyaleNewFeaturesAPITester:
                 result = response.json()
                 credits_earned = result.get("credits_earned", 0)
                 
-                if credits_earned == 3:
-                    self.log(f"✅ Task completion awarded correct 3 credits")
+                if credits_earned == 10:
+                    self.log(f"✅ Task completion awarded correct 10 credits")
                 else:
-                    self.log(f"❌ Task should award 3 credits, got {credits_earned}")
+                    self.log(f"❌ Task should award 10 credits, got {credits_earned}")
                     return False
                 
                 # Verify user's total credits increased
-                expected_total = original_credits + 3
+                expected_total = original_credits + 10
                 actual_total = result.get("total_credits", 0)
                 if actual_total == expected_total:
-                    self.log(f"✅ User credits updated correctly: {original_credits} + 3 = {actual_total}")
+                    self.log(f"✅ User credits updated correctly: {original_credits} + 10 = {actual_total}")
+                    # Update our test user data
+                    user['credits'] = actual_total
                 else:
                     self.log(f"❌ User credits not updated correctly: expected {expected_total}, got {actual_total}")
                     return False
@@ -385,7 +444,33 @@ class FocusRoyaleNewFeaturesAPITester:
             self.log(f"❌ Error completing task: {str(e)}")
             return False
         
-        self.log("✅ Tasks System tests passed")
+        # Test 4: Verify task is marked as completed and no longer appears in active tasks
+        try:
+            response = requests.get(f"{self.base_url}/tasks/{user_id}", timeout=10)
+            if response.status_code == 200:
+                user_tasks = response.json()
+                
+                # Completed task should not appear in active tasks list
+                completed_task_found = False
+                for task in user_tasks:
+                    if task['id'] == created_task['id']:
+                        completed_task_found = True
+                        break
+                
+                if not completed_task_found:
+                    self.log("✅ Completed task correctly removed from active tasks list")
+                else:
+                    self.log("❌ Completed task should not appear in active tasks list")
+                    return False
+                
+            else:
+                self.log(f"❌ Failed to get user tasks after completion: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error verifying task completion: {str(e)}")
+            return False
+        
+        self.log("✅ Personal Tasks System tests passed")
         return True
     
     def test_notifications_system(self):
