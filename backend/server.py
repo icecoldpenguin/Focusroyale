@@ -996,8 +996,8 @@ async def spin_wheel(input: Dict[str, str]):
     notification = Notification(
         user_id=user_id,
         message=f"🎰 Daily wheel spin earned you {reward} FC!",
-        type="wheel_reward",
-        created_at=current_time
+        notification_type="wheel_reward",
+        timestamp=current_time
     )
     await db.notifications.insert_one(notification.dict())
     
