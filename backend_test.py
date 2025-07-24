@@ -638,7 +638,248 @@ class FocusRoyaleNewFeaturesAPITester:
         self.log("✅ Temporary Effects tests passed")
         return True
     
-    def test_daily_wheel_feature(self):
+    def test_social_credit_rate_system(self):
+        """Test Social Credit Rate System - rate scales with active users"""
+        self.log("\n=== Testing Social Credit Rate System ===")
+        
+        if len(self.test_users) < 2:
+            self.log("❌ Need at least 2 users for social rate testing")
+            return False
+        
+        # Test 1: Get social rate when no users are focusing
+        try:
+            response = requests.get(f"{self.base_url}/focus/social-rate", timeout=10)
+            if response.status_code == 200:
+                social_data = response.json()
+                active_count = social_data.get('active_users_count', 0)
+                social_multiplier = social_data.get('social_multiplier', 0)
+                
+                if active_count == 0 and social_multiplier == 1.0:
+                    self.log("✅ Social rate correct when no users focusing: 1.0x multiplier")
+                else:
+                    self.log(f"❌ Expected 0 active users and 1.0x multiplier, got {active_count} users and {social_multiplier}x")
+                    return False
+                    
+            else:
+                self.log(f"❌ Failed to get social rate: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error getting social rate: {str(e)}")
+            return False
+        
+        # Test 2: Start focus session for user 1 and verify social rate increases
+        user1 = self.test_users[0]
+        try:
+            response = requests.post(
+                f"{self.base_url}/focus/start",
+                json={"user_id": user1['id']},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                self.log(f"✅ Started focus session for user1: {user1['username']}")
+                
+                # Check social rate with 1 active user
+                response = requests.get(f"{self.base_url}/focus/social-rate", timeout=10)
+                if response.status_code == 200:
+                    social_data = response.json()
+                    active_count = social_data.get('active_users_count', 0)
+                    social_multiplier = social_data.get('social_multiplier', 0)
+                    
+                    if active_count == 1 and social_multiplier == 1.0:
+                        self.log("✅ Social rate correct with 1 user focusing: 1.0x multiplier")
+                    else:
+                        self.log(f"❌ Expected 1 active user and 1.0x multiplier, got {active_count} users and {social_multiplier}x")
+                        return False
+                else:
+                    self.log(f"❌ Failed to get social rate with 1 user: {response.status_code}")
+                    return False
+                    
+            else:
+                self.log(f"❌ Failed to start focus session for user1: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error starting focus session for user1: {str(e)}")
+            return False
+        
+        # Test 3: Start focus session for user 2 and verify social rate scales to 2.0x
+        user2 = self.test_users[1]
+        try:
+            response = requests.post(
+                f"{self.base_url}/focus/start",
+                json={"user_id": user2['id']},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                self.log(f"✅ Started focus session for user2: {user2['username']}")
+                
+                # Check social rate with 2 active users
+                response = requests.get(f"{self.base_url}/focus/social-rate", timeout=10)
+                if response.status_code == 200:
+                    social_data = response.json()
+                    active_count = social_data.get('active_users_count', 0)
+                    social_multiplier = social_data.get('social_multiplier', 0)
+                    
+                    if active_count == 2 and social_multiplier == 2.0:
+                        self.log("✅ Social rate correct with 2 users focusing: 2.0x multiplier")
+                    else:
+                        self.log(f"❌ Expected 2 active users and 2.0x multiplier, got {active_count} users and {social_multiplier}x")
+                        return False
+                else:
+                    self.log(f"❌ Failed to get social rate with 2 users: {response.status_code}")
+                    return False
+                    
+            else:
+                self.log(f"❌ Failed to start focus session for user2: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error starting focus session for user2: {str(e)}")
+            return False
+        
+        # Test 4: End sessions and verify social rate decreases
+        try:
+            # End user1's session
+            response = requests.post(
+                f"{self.base_url}/focus/end",
+                json={"user_id": user1['id']},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                end_data = response.json()
+                credits_earned = end_data.get('credits_earned', 0)
+                effective_rate = end_data.get('effective_rate', 0)
+                
+                # With 2 users focusing, effective rate should be 2.0x
+                if effective_rate == 2.0:
+                    self.log(f"✅ User1 earned credits with 2.0x social multiplier: {credits_earned} credits")
+                else:
+                    self.log(f"❌ Expected 2.0x effective rate, got {effective_rate}x")
+                    return False
+                
+                # Update user1 credits
+                user1['credits'] = user1.get('credits', 0) + credits_earned
+                
+            else:
+                self.log(f"❌ Failed to end focus session for user1: {response.status_code}")
+                return False
+            
+            # Check social rate with 1 active user remaining
+            response = requests.get(f"{self.base_url}/focus/social-rate", timeout=10)
+            if response.status_code == 200:
+                social_data = response.json()
+                active_count = social_data.get('active_users_count', 0)
+                social_multiplier = social_data.get('social_multiplier', 0)
+                
+                if active_count == 1 and social_multiplier == 1.0:
+                    self.log("✅ Social rate correctly decreased to 1.0x with 1 user remaining")
+                else:
+                    self.log(f"❌ Expected 1 active user and 1.0x multiplier, got {active_count} users and {social_multiplier}x")
+                    return False
+            else:
+                self.log(f"❌ Failed to get social rate after user1 ended: {response.status_code}")
+                return False
+            
+            # End user2's session
+            response = requests.post(
+                f"{self.base_url}/focus/end",
+                json={"user_id": user2['id']},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                end_data = response.json()
+                credits_earned = end_data.get('credits_earned', 0)
+                effective_rate = end_data.get('effective_rate', 0)
+                
+                # User2 should have earned with varying rates as users left
+                self.log(f"✅ User2 session ended, earned {credits_earned} credits")
+                
+                # Update user2 credits
+                user2['credits'] = user2.get('credits', 0) + credits_earned
+                
+            else:
+                self.log(f"❌ Failed to end focus session for user2: {response.status_code}")
+                return False
+            
+            # Check social rate with no active users
+            response = requests.get(f"{self.base_url}/focus/social-rate", timeout=10)
+            if response.status_code == 200:
+                social_data = response.json()
+                active_count = social_data.get('active_users_count', 0)
+                social_multiplier = social_data.get('social_multiplier', 0)
+                
+                if active_count == 0 and social_multiplier == 1.0:
+                    self.log("✅ Social rate correctly reset to 1.0x with no active users")
+                else:
+                    self.log(f"❌ Expected 0 active users and 1.0x multiplier, got {active_count} users and {social_multiplier}x")
+                    return False
+            else:
+                self.log(f"❌ Failed to get social rate after all users ended: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Error testing session endings: {str(e)}")
+            return False
+        
+        self.log("✅ Social Credit Rate System tests passed")
+        return True
+    
+    def test_leaderboard_system(self):
+        """Test Leaderboard System"""
+        self.log("\n=== Testing Leaderboard System ===")
+        
+        if not self.test_users:
+            self.log("❌ No test users available for leaderboard testing")
+            return False
+        
+        try:
+            response = requests.get(f"{self.base_url}/leaderboard", timeout=10)
+            if response.status_code == 200:
+                leaderboard = response.json()
+                self.log(f"✅ Retrieved leaderboard with {len(leaderboard)} users")
+                
+                # Verify users are sorted by credits in descending order
+                if len(leaderboard) > 1:
+                    for i in range(len(leaderboard) - 1):
+                        current_credits = leaderboard[i].get('credits', 0)
+                        next_credits = leaderboard[i + 1].get('credits', 0)
+                        
+                        if current_credits < next_credits:
+                            self.log(f"❌ Leaderboard not sorted correctly: {current_credits} < {next_credits}")
+                            return False
+                    
+                    self.log("✅ Leaderboard correctly sorted by credits (descending)")
+                
+                # Verify no password hashes are exposed
+                for user in leaderboard:
+                    if 'password_hash' in user:
+                        self.log("❌ Password hash exposed in leaderboard")
+                        return False
+                
+                self.log("✅ No password hashes exposed in leaderboard")
+                
+                # Verify our test users appear in leaderboard
+                test_user_ids = [user['id'] for user in self.test_users]
+                leaderboard_user_ids = [user['id'] for user in leaderboard]
+                
+                for test_user_id in test_user_ids:
+                    if test_user_id in leaderboard_user_ids:
+                        self.log(f"✅ Test user found in leaderboard")
+                    else:
+                        self.log(f"❌ Test user {test_user_id} not found in leaderboard")
+                        return False
+                
+            else:
+                self.log(f"❌ Failed to get leaderboard: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error getting leaderboard: {str(e)}")
+            return False
+        
+        self.log("✅ Leaderboard System tests passed")
+        return True
         """Test NEW Daily Wheel Feature - Level 6+ users can spin once per day for 10-100 FC"""
         self.log("\n=== Testing Daily Wheel Feature ===")
         
