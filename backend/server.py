@@ -627,6 +627,18 @@ async def purchase_item(input: PurchaseRequest):
     if user["credits"] < item["price"]:
         raise HTTPException(status_code=400, detail="Insufficient credits")
     
+    # Check if user is frozen (can't use passes)
+    await clean_expired_effects()
+    user = await db.users.find_one({"id": input.user_id})  # Refresh user data
+    
+    active_effects = user.get("active_effects", [])
+    current_time = datetime.utcnow()
+    
+    for effect in active_effects:
+        if (effect.get("expires_at") and datetime.fromisoformat(effect["expires_at"]) > current_time and
+            effect.get("type") == "freeze_passes"):
+            raise HTTPException(status_code=400, detail="You are frozen and cannot use any passes!")
+    
     # Check if target is required but not provided
     if item.get("requires_target", False) and not input.target_user_id:
         raise HTTPException(status_code=400, detail="Target user required for this item")
