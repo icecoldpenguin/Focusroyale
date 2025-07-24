@@ -803,6 +803,61 @@ async def purchase_item(input: PurchaseRequest):
             )
             await db.notifications.insert_one(notification.dict())
         
+        elif "inversion_swap" in item["effect"] and target_user:
+            # Inversion Pass - swap credit rate multipliers
+            if not target_user:
+                raise HTTPException(status_code=400, detail="Target user required for inversion")
+            
+            # Get current multipliers
+            user_multiplier = user.get("credit_rate_multiplier", 1.0)
+            target_multiplier = target_user.get("credit_rate_multiplier", 1.0)
+            
+            # Create temporary swap effects for both users
+            expires_at = datetime.utcnow() + timedelta(hours=item.get("duration_hours", 1))
+            
+            # Effect for the purchaser (gets target's multiplier)
+            purchaser_effect = {
+                "type": "inversion_swap",
+                "swapped_multiplier": target_multiplier,
+                "original_multiplier": user_multiplier,
+                "swap_partner": input.target_user_id,
+                "expires_at": expires_at.isoformat(),
+                "applied_by": input.user_id
+            }
+            
+            # Effect for the target (gets purchaser's multiplier)
+            target_effect = {
+                "type": "inversion_swap",
+                "swapped_multiplier": user_multiplier,
+                "original_multiplier": target_multiplier,
+                "swap_partner": input.user_id,
+                "expires_at": expires_at.isoformat(),
+                "applied_by": input.user_id
+            }
+            
+            # Apply effects to both users
+            await db.users.update_one(
+                {"id": input.user_id},
+                {
+                    "$inc": {"credits": -item["price"]},
+                    "$push": {"active_effects": purchaser_effect}
+                }
+            )
+            
+            await db.users.update_one(
+                {"id": input.target_user_id},
+                {"$push": {"active_effects": target_effect}}
+            )
+            
+            # Notify target
+            notification = Notification(
+                user_id=input.target_user_id,
+                message=f"{user['username']} swapped credit multipliers with you for 1 hour! ({user_multiplier:.1f}x ↔ {target_multiplier:.1f}x)",
+                notification_type="inversion_used",
+                related_user_id=input.user_id
+            )
+            await db.notifications.insert_one(notification.dict())
+        
         elif "trade_request" in item["effect"]:
             # Trade Pass - requires mutual consent
             mutual_consent_required = True
