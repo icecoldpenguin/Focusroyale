@@ -1422,6 +1422,12 @@ function App() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+      {/* Notification Container */}
+      <NotificationContainer 
+        notifications={appNotifications} 
+        onRemove={removeNotification} 
+      />
+      
       {/* Header */}
       <header className="header-container p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
