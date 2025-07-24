@@ -578,6 +578,17 @@ function App() {
   const [wheelStatus, setWheelStatus] = useState(null);
   const [isSpinning, setIsSpinning] = useState(false);
   const [wheelResult, setWheelResult] = useState(null);
+  
+  // Notification system state
+  const [appNotifications, setAppNotifications] = useState([]);
+  
+  // Timer state (for focus sessions)
+  const [timer, setTimer] = useState({
+    duration: 30, // default 30 minutes
+    timeLeft: 30 * 60, // in seconds
+    isRunning: false,
+    isSet: false
+  });
 
   // Get tab requirements
   const getTabRequirements = (tab) => {
