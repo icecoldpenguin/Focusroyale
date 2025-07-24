@@ -740,12 +740,80 @@ async def purchase_item(input: PurchaseRequest):
     elif item["item_type"] == "sabotage" and target_user:
         effect = item["effect"]
         
+        # Check if target has immunity or mirror shield
+        target_effects = target_user.get("active_effects", [])
+        current_time = datetime.utcnow()
+        
+        has_immunity = False
+        has_mirror = False
+        
+        for target_effect in target_effects:
+            if (target_effect.get("expires_at") and datetime.fromisoformat(target_effect["expires_at"]) > current_time):
+                if target_effect.get("type") == "immunity_shield":
+                    has_immunity = True
+                    break
+                elif target_effect.get("type") == "mirror_shield":
+                    has_mirror = True
+                    
+                    # Remove the mirror shield (one-time use)
+                    await db.users.update_one(
+                        {"id": input.target_user_id},
+                        {"$pull": {"active_effects": {"type": "mirror_shield"}}}
+                    )
+                    break
+        
+        # If target has immunity, block the attack completely
+        if has_immunity:
+            # Still deduct credits from attacker but no effect on target
+            await db.users.update_one(
+                {"id": input.user_id},
+                {"$inc": {"credits": -item["price"]}}
+            )
+            
+            # Notify target they were protected
+            notification = Notification(
+                user_id=input.target_user_id,
+                message=f"Your Immunity Shield blocked {user['username']}'s {item['name']}!",
+                notification_type="immunity_blocked",
+                related_user_id=input.user_id
+            )
+            await db.notifications.insert_one(notification.dict())
+            
+            return {
+                "success": True,
+                "item_name": item["name"],
+                "credits_spent": item["price"],
+                "target_user_id": input.target_user_id,
+                "requires_consent": False,
+                "message": f"Attack blocked by {target_user['username']}'s Immunity Shield!"
+            }
+        
+        # If target has mirror shield, reflect the attack back
+        elif has_mirror:
+            # Apply the effect to the attacker instead
+            actual_target_id = input.user_id
+            actual_target = user
+        else:
+            # Normal attack
+            actual_target_id = input.target_user_id
+            actual_target = target_user
+        
         if "reset_credits" in effect and effect["reset_credits"]:
             # Reset Pass - reset target's credits
             await db.users.update_one(
-                {"id": input.target_user_id},
+                {"id": actual_target_id},
                 {"$set": {"credits": 0}}
             )
+            
+            if has_mirror:
+                # Notify about reflection
+                notification = Notification(
+                    user_id=input.user_id,
+                    message=f"{target_user['username']}'s Mirror Shield reflected your {item['name']} back at you!",
+                    notification_type="mirror_reflected",
+                    related_user_id=input.target_user_id
+                )
+                await db.notifications.insert_one(notification.dict())
         
         elif "rate_halved" in effect or "rate_reduction" in effect:
             # Degression Pass - temporary rate halving effect
@@ -758,9 +826,18 @@ async def purchase_item(input: PurchaseRequest):
             }
             
             await db.users.update_one(
-                {"id": input.target_user_id},
+                {"id": actual_target_id},
                 {"$push": {"active_effects": degression_effect}}
             )
+            
+            if has_mirror:
+                notification = Notification(
+                    user_id=input.user_id,
+                    message=f"{target_user['username']}'s Mirror Shield reflected your {item['name']} back at you!",
+                    notification_type="mirror_reflected",
+                    related_user_id=input.target_user_id
+                )
+                await db.notifications.insert_one(notification.dict())
         
         elif "global_dominance" in effect and effect["global_dominance"]:
             # Dominance Pass - all other players earn 50% credits
