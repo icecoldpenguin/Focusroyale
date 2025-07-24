@@ -634,6 +634,36 @@ async def purchase_item(input: PurchaseRequest):
             )
             await db.notifications.insert_one(notification.dict())
     
+    elif item["item_type"] == "defensive":
+        # Defensive passes - Mirror and Immunity
+        effect = item["effect"]
+        expires_at = datetime.utcnow() + timedelta(hours=item.get("duration_hours", 24))
+        
+        if "mirror_shield" in effect and effect["mirror_shield"]:
+            # Mirror Pass - reflects next pass back
+            mirror_effect = {
+                "type": "mirror_shield",
+                "active": True,
+                "expires_at": expires_at.isoformat(),
+                "applied_by": input.user_id
+            }
+        elif "immunity_shield" in effect and effect["immunity_shield"]:
+            # Immunity Pass - blocks all negative passes
+            mirror_effect = {
+                "type": "immunity_shield",
+                "active": True,
+                "expires_at": expires_at.isoformat(),
+                "applied_by": input.user_id
+            }
+        
+        await db.users.update_one(
+            {"id": input.user_id},
+            {
+                "$inc": {"credits": -item["price"]},
+                "$push": {"active_effects": mirror_effect}
+            }
+        )
+    
     elif item["item_type"] == "sabotage" and target_user:
         effect = item["effect"]
         
