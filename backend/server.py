@@ -1704,6 +1704,15 @@ async def initialize_shop_items():
 # Include the router in the main app
 app.include_router(api_router)
 
+# Health check endpoint (without /api prefix for Railway health checks)
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
+
+@app.get("/")
+async def root():
+    return {"message": "Focus Royale Backend is running!", "status": "ok"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
