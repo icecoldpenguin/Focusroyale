@@ -1560,9 +1560,68 @@ function App() {
                       Social: {socialRate.social_multiplier.toFixed(1)}x • Personal: {currentUser.credit_rate_multiplier.toFixed(1)}x
                     </div>
                   </div>
+                  
+                  {/* Timer Component - Only available during focus sessions */}
+                  <div className="timer-container">
+                    <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+                      Focus Timer
+                    </h3>
+                    
+                    {/* Duration Selector */}
+                    <div className="timer-duration-selector">
+                      {[10, 20, 30, 45, 60, 90, 120, 180, 240].map((minutes) => (
+                        <button
+                          key={minutes}
+                          onClick={() => setTimerDuration(minutes)}
+                          className={`timer-duration-btn ${timer.duration === minutes ? 'active' : ''}`}
+                          disabled={timer.isRunning}
+                        >
+                          {minutes >= 60 ? `${Math.floor(minutes/60)}h${minutes%60 ? ` ${minutes%60}m` : ''}` : `${minutes}m`}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Timer Display */}
+                    <div className="timer-display">
+                      {formatTime(timer.timeLeft)}
+                    </div>
+                    
+                    {/* Timer Controls */}
+                    <div className="timer-controls">
+                      {!timer.isRunning ? (
+                        <button
+                          onClick={startTimer}
+                          className="timer-btn start"
+                          disabled={timer.timeLeft === 0}
+                        >
+                          ▶️ {timer.isSet ? 'Resume' : 'Start'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={pauseTimer}
+                          className="timer-btn pause"
+                        >
+                          ⏸️ Pause
+                        </button>
+                      )}
+                      
+                      <button
+                        onClick={resetTimer}
+                        className="timer-btn reset"
+                        disabled={!timer.isSet}
+                      >
+                        🔄 Reset
+                      </button>
+                    </div>
+                    
+                    <div className="text-xs mt-2 opacity-70" style={{ color: 'var(--text-secondary)' }}>
+                      {timer.isRunning ? '🟢 Timer is running' : timer.isSet ? '⏸️ Timer is paused' : '⏱️ Set a timer to stay focused'}
+                    </div>
+                  </div>
+                  
                   <button
                     onClick={endFocusSession}
-                    className="btn-enhanced bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700"
+                    className="btn-enhanced bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 mt-4"
                   >
                     End Session
                   </button>
