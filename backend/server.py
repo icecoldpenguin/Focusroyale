@@ -880,9 +880,18 @@ async def purchase_item(input: PurchaseRequest):
             }
             
             await db.users.update_one(
-                {"id": input.target_user_id},
+                {"id": actual_target_id},
                 {"$push": {"active_effects": assassin_effect}}
             )
+            
+            if has_mirror:
+                notification = Notification(
+                    user_id=input.user_id,
+                    message=f"{target_user['username']}'s Mirror Shield reflected your {item['name']} back at you!",
+                    notification_type="mirror_reflected",
+                    related_user_id=input.target_user_id
+                )
+                await db.notifications.insert_one(notification.dict())
         
         elif "freeze_passes" in effect and effect["freeze_passes"]:
             # Freeze Pass - can't use passes for 12 hours
@@ -895,9 +904,18 @@ async def purchase_item(input: PurchaseRequest):
             }
             
             await db.users.update_one(
-                {"id": input.target_user_id},
+                {"id": actual_target_id},
                 {"$push": {"active_effects": freeze_effect}}
             )
+            
+            if has_mirror:
+                notification = Notification(
+                    user_id=input.user_id,
+                    message=f"{target_user['username']}'s Mirror Shield reflected your {item['name']} back at you!",
+                    notification_type="mirror_reflected",
+                    related_user_id=input.target_user_id
+                )
+                await db.notifications.insert_one(notification.dict())
         
         # Deduct credits from purchaser
         await db.users.update_one(
@@ -905,14 +923,15 @@ async def purchase_item(input: PurchaseRequest):
             {"$inc": {"credits": -item["price"]}}
         )
         
-        # Create notification for target
-        notification = Notification(
-            user_id=input.target_user_id,
-            message=f"{user['username']} used {item['name']} on you!",
-            notification_type="pass_used",
-            related_user_id=input.user_id
-        )
-        await db.notifications.insert_one(notification.dict())
+        # Create notification for target (unless it was reflected)
+        if not has_mirror:
+            notification = Notification(
+                user_id=input.target_user_id,
+                message=f"{user['username']} used {item['name']} on you!",
+                notification_type="pass_used",
+                related_user_id=input.user_id
+            )
+            await db.notifications.insert_one(notification.dict())
     
     elif item["item_type"] == "special":
         if "ally_boost" in item["effect"]:
