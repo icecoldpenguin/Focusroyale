@@ -1864,6 +1864,117 @@ function App() {
           )
         )}
 
+        {/* Daily Wheel Tab */}
+        {activeTab === 'wheel' && (
+          currentUser.level >= 6 ? (
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold">🎰 Daily Wheel</h2>
+                <p className="opacity-70">Spin the wheel once per day to earn 10-100 FC!</p>
+              </div>
+
+              <div className="max-w-md mx-auto">
+                <div className="card-enhanced p-8 rounded-lg text-center">
+                  {/* Wheel Visual */}
+                  <div className="relative mx-auto mb-6" style={{ width: '200px', height: '200px' }}>
+                    <div 
+                      className={`wheel-spinner ${isSpinning ? 'spinning' : ''}`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '50%',
+                        background: 'conic-gradient(from 0deg, #ff6b6b 0deg 45deg, #4ecdc4 45deg 90deg, #45b7d1 90deg 135deg, #96ceb4 135deg 180deg, #feca57 180deg 225deg, #ff9ff3 225deg 270deg, #54a0ff 270deg 315deg, #5f27cd 315deg 360deg)',
+                        border: '4px solid var(--accent-color)',
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <div className="text-white font-bold text-lg">🎰</div>
+                      {/* Pointer */}
+                      <div 
+                        style={{
+                          position: 'absolute',
+                          top: '-10px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: '0',
+                          height: '0',
+                          borderLeft: '10px solid transparent',
+                          borderRight: '10px solid transparent',
+                          borderBottom: '15px solid var(--accent-color)',
+                          zIndex: 10
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Wheel Status */}
+                  <div className="mb-6">
+                    {wheelStatus?.can_spin ? (
+                      <div className="text-green-500 font-semibold">
+                        ✅ Ready to spin!
+                      </div>
+                    ) : wheelStatus?.reason === 'already_spun_today' ? (
+                      <div className="text-orange-500">
+                        <div className="font-semibold">Already spun today!</div>
+                        <div className="text-sm mt-1">
+                          Next spin: {new Date(wheelStatus.next_spin_available).toLocaleString()}
+                        </div>
+                      </div>
+                    ) : wheelStatus?.reason === 'requires_level_6' ? (
+                      <div className="text-red-500">
+                        <div className="font-semibold">Requires Level 6</div>
+                        <div className="text-sm mt-1">Current Level: {wheelStatus.user_level}</div>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500">Loading...</div>
+                    )}
+                  </div>
+
+                  {/* Spin Button */}
+                  <button
+                    onClick={spinWheel}
+                    disabled={!wheelStatus?.can_spin || isSpinning}
+                    className={`btn-enhanced px-8 py-4 rounded-lg font-bold text-lg transition-all ${
+                      wheelStatus?.can_spin && !isSpinning
+                        ? 'hover:scale-110 cursor-pointer'
+                        : 'opacity-50 cursor-not-allowed'
+                    }`}
+                    style={{
+                      backgroundColor: wheelStatus?.can_spin && !isSpinning ? 'var(--accent-color)' : 'var(--bg-tertiary)',
+                      color: wheelStatus?.can_spin && !isSpinning ? 'var(--bg-primary)' : 'var(--text-muted)'
+                    }}
+                  >
+                    {isSpinning ? 'Spinning...' : 'Spin the Wheel!'}
+                  </button>
+
+                  {/* Result Display */}
+                  {wheelResult && (
+                    <div className="mt-6 p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                      <div className="text-xl font-bold text-green-500 mb-2">
+                        🎉 Congratulations!
+                      </div>
+                      <div className="text-lg">
+                        You won <span className="font-bold text-yellow-500">{wheelResult.reward} FC</span>!
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Possible Rewards Info */}
+                  <div className="mt-8 text-sm opacity-70">
+                    <div className="font-semibold mb-2">Possible Rewards:</div>
+                    <div>10 FC - 100 FC (Random)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <LockedTabContent requiredLevel={6} />
+          )
+        )}
+
         {/* Leaderboard Tab */}
         {activeTab === 'leaderboard' && (
           <div className="space-y-6">
