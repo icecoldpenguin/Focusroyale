@@ -260,8 +260,8 @@ class FocusRoyaleNewFeaturesAPITester:
         return True
     
     def test_new_pass_system(self):
-        """Test NEW Pass System with 6 shop items"""
-        self.log("\n=== Testing NEW Pass System (6 Shop Items) ===")
+        """Test NEW Pass System with ALL 13 shop items (6 original + 7 new advanced)"""
+        self.log("\n=== Testing NEW Pass System (13 Shop Items Total) ===")
         
         # Test 1: Initialize shop with new items
         try:
@@ -275,21 +275,30 @@ class FocusRoyaleNewFeaturesAPITester:
             self.log(f"❌ Error initializing shop: {str(e)}")
             return False
         
-        # Test 2: Get shop items and verify all 6 new passes
+        # Test 2: Get shop items and verify all 13 passes (6 original + 7 new advanced)
         try:
             response = requests.get(f"{self.base_url}/shop/items", timeout=10)
             if response.status_code == 200:
                 self.shop_items = response.json()
                 self.log(f"✅ Retrieved {len(self.shop_items)} shop items")
                 
-                # Verify we have all 6 new passes
+                # Verify we have all 13 passes (6 original + 7 new advanced)
                 expected_passes = [
+                    # Original 6 passes
                     {"name": "Level Pass", "price": 100, "type": "level"},
                     {"name": "Progression Pass", "price": 80, "type": "boost"},
                     {"name": "Degression Pass", "price": 120, "type": "sabotage"},
                     {"name": "Reset Pass", "price": 500, "type": "sabotage"},
                     {"name": "Ally Token", "price": 60, "type": "special"},
-                    {"name": "Trade Pass", "price": 50, "type": "special"}
+                    {"name": "Trade Pass", "price": 50, "type": "special"},
+                    # New 7 advanced passes
+                    {"name": "Mirror Pass", "price": 250, "type": "defensive"},
+                    {"name": "Dominance Pass", "price": 300, "type": "sabotage"},
+                    {"name": "Time Loop Pass", "price": 200, "type": "boost"},
+                    {"name": "Immunity Pass", "price": 300, "type": "defensive"},
+                    {"name": "Assassin Pass", "price": 120, "type": "sabotage"},
+                    {"name": "Freeze Pass", "price": 150, "type": "sabotage"},
+                    {"name": "Inversion Pass", "price": 180, "type": "special"}
                 ]
                 
                 found_passes = []
@@ -304,10 +313,11 @@ class FocusRoyaleNewFeaturesAPITester:
                                 self.log(f"❌ {expected['name']} has wrong type: expected {expected['type']}, got {item['item_type']}")
                                 return False
                 
-                if len(found_passes) == 6:
-                    self.log("✅ All 6 new passes found with correct prices and types")
+                if len(found_passes) == 13:
+                    self.log("✅ All 13 passes found with correct prices and types (6 original + 7 new advanced)")
+                    self.log(f"   Found passes: {', '.join(found_passes)}")
                 else:
-                    self.log(f"❌ Expected 6 passes, found {len(found_passes)}: {found_passes}")
+                    self.log(f"❌ Expected 13 passes, found {len(found_passes)}: {found_passes}")
                     return False
                 
             else:
