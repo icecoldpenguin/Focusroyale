@@ -782,10 +782,31 @@ function App() {
       
       setCurrentUser(response.data.user);
       setAuthForm({ username: '', password: '' });
-      await fetchUsers();
-      await fetchNotifications();
-      await fetchTasks();
-      await fetchWeeklyTasks();
+      
+      // Fetch additional data, but don't fail registration if these fail
+      try {
+        await fetchUsers();
+      } catch (error) {
+        console.error('Failed to fetch users after auth:', error);
+      }
+      
+      try {
+        await fetchNotifications();
+      } catch (error) {
+        console.error('Failed to fetch notifications after auth:', error);
+      }
+      
+      try {
+        await fetchTasks();
+      } catch (error) {
+        console.error('Failed to fetch tasks after auth:', error);
+      }
+      
+      try {
+        await fetchWeeklyTasks();
+      } catch (error) {
+        console.error('Failed to fetch weekly tasks after auth:', error);
+      }
       
     } catch (error) {
       console.error('Auth failed:', error);
