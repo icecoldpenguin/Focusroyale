@@ -1283,3 +1283,72 @@ body {
 .btn-enhanced:active:not(:disabled) {
   transform: translateY(0);
 }
+
+/* Daily Wheel Styles */
+.wheel-spinner {
+  transition: transform 0.3s ease;
+}
+
+.wheel-spinner.spinning {
+  animation: wheelSpin 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes wheelSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(1800deg); } /* 5 full rotations */
+}
+
+/* Locked Tab Content Styles */
+.locked-tab-content {
+  position: relative;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.locked-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-secondary);
+  filter: blur(8px);
+  border-radius: 12px;
+  opacity: 0.3;
+}
+
+.lock-overlay {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.5s ease-out;
+}
+
+[data-theme="dark"] .lock-overlay {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: var(--border-color);
+}
+
+.lock-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: lockPulse 2s infinite;
+}
+
+.lock-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+@keyframes lockPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
