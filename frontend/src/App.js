@@ -720,6 +720,54 @@ function App() {
     }
   };
 
+  const fetchWheelStatus = async () => {
+    if (!currentUser) return;
+    try {
+      const response = await axios.get(`${API}/wheel/status/${currentUser.id}`);
+      setWheelStatus(response.data);
+    } catch (error) {
+      console.error('Failed to fetch wheel status:', error);
+    }
+  };
+
+  const spinWheel = async () => {
+    if (!currentUser || !wheelStatus?.can_spin) return;
+    
+    try {
+      setIsSpinning(true);
+      setWheelResult(null);
+      
+      // Simulate spinning animation delay
+      setTimeout(async () => {
+        try {
+          const response = await axios.post(`${API}/wheel/spin`, {
+            user_id: currentUser.id
+          });
+          
+          setWheelResult(response.data);
+          
+          // Update user credits
+          const updatedUser = await axios.get(`${API}/users/${currentUser.id}`);
+          setCurrentUser(updatedUser.data);
+          
+          // Refresh wheel status
+          await fetchWheelStatus();
+          await fetchNotifications();
+          
+        } catch (error) {
+          console.error('Failed to spin wheel:', error);
+          alert(error.response?.data?.detail || 'Failed to spin wheel');
+        } finally {
+          setIsSpinning(false);
+        }
+      }, 2000); // 2 second spinning animation
+      
+    } catch (error) {
+      console.error('Failed to spin wheel:', error);
+      setIsSpinning(false);
+    }
+  };
+
   const createTask = async (title, description) => {
     if (!currentUser) return;
     
