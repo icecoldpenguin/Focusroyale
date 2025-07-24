@@ -44,6 +44,7 @@ class User(BaseModel):
     completed_tasks: int = 0
     bio: str = ""
     profile_picture: str = ""
+    last_wheel_spin: Optional[datetime] = None  # tracks daily wheel spin
 
 class UserRegister(BaseModel):
     username: str
