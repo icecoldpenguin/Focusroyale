@@ -1692,7 +1692,8 @@ function App() {
               {shopItems.map((item, index) => (
                 <div key={item.id} className={`shop-item-animated card-enhanced rounded-lg p-6 ${
                   item.item_type === 'sabotage' ? 'shop-item-sabotage' :
-                  item.item_type === 'special' ? 'shop-item-special' : 'shop-item-boost'
+                  item.item_type === 'special' ? 'shop-item-special' : 
+                  item.item_type === 'defensive' ? 'shop-item-defensive' : 'shop-item-boost'
                 }`} style={{ animationDelay: `${index * 0.1}s` }}>
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-lg font-bold flex items-center">
@@ -1701,7 +1702,8 @@ function App() {
                     </h3>
                     <div className={`px-3 py-1 rounded text-sm font-semibold text-white ${
                       item.item_type === 'sabotage' ? 'bg-red-600' :
-                      item.item_type === 'special' ? 'bg-blue-600' : 'bg-green-600'
+                      item.item_type === 'special' ? 'bg-blue-600' : 
+                      item.item_type === 'defensive' ? 'bg-purple-600' : 'bg-green-600'
                     }`}>
                       {item.price} FC
                     </div>
