@@ -181,15 +181,37 @@ async def calculate_effective_credit_rate(user_data: dict) -> float:
     active_effects = user_data.get("active_effects", [])
     current_time = datetime.utcnow()
     
+    # Check for immunity first - blocks negative effects
+    has_immunity = False
+    for effect in active_effects:
+        if (effect.get("expires_at") and datetime.fromisoformat(effect["expires_at"]) > current_time and 
+            effect.get("type") == "immunity_shield"):
+            has_immunity = True
+            break
+    
+    # Check for dominance effect first - overrides social multiplier
+    dominance_active = False
+    for effect in active_effects:
+        if (effect.get("expires_at") and datetime.fromisoformat(effect["expires_at"]) > current_time and 
+            effect.get("type") == "global_dominance"):
+            dominance_active = True
+            break
+    
     for effect in active_effects:
         if effect.get("expires_at") and datetime.fromisoformat(effect["expires_at"]) > current_time:
-            if effect["type"] == "degression":
-                # Halve the effective rate instead of subtracting
+            if effect["type"] == "degression" and not has_immunity:
+                # Halve the effective rate
                 effective_rate = effective_rate * 0.5
             elif effect["type"] == "ally_boost":
                 effective_rate += effect.get("rate_boost", 1.0)
+            elif effect["type"] == "dominance_reduced" and not dominance_active:
+                # User is affected by someone else's dominance
+                effective_rate = effective_rate * 0.5
+            elif effect["type"] == "inversion_swap":
+                # Use the swapped multiplier instead of original
+                effective_rate = effect.get("swapped_multiplier", base_rate)
     
-    # Apply social multiplier to final rate
+    # Apply social multiplier to final rate (unless dominance is active for this user)
     final_rate = max(0.1, effective_rate) * social_multiplier
     
     return final_rate
