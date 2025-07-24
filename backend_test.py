@@ -553,6 +553,252 @@ class FocusRoyaleNewFeaturesAPITester:
         self.log("✅ Temporary Effects tests passed")
         return True
     
+    def test_daily_wheel_feature(self):
+        """Test NEW Daily Wheel Feature - Level 6+ users can spin once per day for 10-100 FC"""
+        self.log("\n=== Testing Daily Wheel Feature ===")
+        
+        if not self.test_users:
+            self.log("❌ No test users available for wheel testing")
+            return False
+        
+        # Test 1: Test wheel status for user below level 6
+        low_level_user = self.test_users[0]  # Should be level 1
+        try:
+            response = requests.get(f"{self.base_url}/wheel/status/{low_level_user['id']}", timeout=10)
+            if response.status_code == 200:
+                status_data = response.json()
+                if not status_data.get("can_spin", True) and status_data.get("reason") == "requires_level_6":
+                    self.log("✅ Level requirement enforced - users below level 6 cannot spin")
+                    self.log(f"   User level: {status_data.get('user_level')}, Required: {status_data.get('required_level')}")
+                else:
+                    self.log(f"❌ Level requirement not enforced properly: {status_data}")
+                    return False
+            else:
+                self.log(f"❌ Failed to get wheel status: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error testing wheel status for low level user: {str(e)}")
+            return False
+        
+        # Test 2: Manually upgrade user to level 6 for testing
+        try:
+            # Update user level directly in database via level pass purchases
+            level_pass = None
+            for item in self.shop_items:
+                if item["name"] == "Level Pass":
+                    level_pass = item
+                    break
+            
+            if not level_pass:
+                self.log("❌ Level Pass not found in shop")
+                return False
+            
+            # Give user enough credits to buy 5 level passes (to reach level 6)
+            # First, let's check current credits and add more via focus sessions
+            current_user_response = requests.get(f"{self.base_url}/users/{low_level_user['id']}", timeout=10)
+            if current_user_response.status_code == 200:
+                current_user = current_user_response.json()
+                current_credits = current_user.get('credits', 0)
+                needed_credits = (level_pass['price'] * 5) - current_credits  # Need 500 credits for 5 level passes
+                
+                if needed_credits > 0:
+                    # Do multiple focus sessions to earn credits
+                    self.log(f"Need {needed_credits} more credits, doing focus sessions...")
+                    for i in range(10):  # Do 10 short sessions
+                        # Start session
+                        requests.post(f"{self.base_url}/focus/start", json={"user_id": low_level_user['id']}, timeout=10)
+                        time.sleep(1)  # 1 second = simulated focus time
+                        # End session
+                        requests.post(f"{self.base_url}/focus/end", json={"user_id": low_level_user['id']}, timeout=10)
+                        time.sleep(0.5)  # Brief pause between sessions
+                
+                # Now buy 5 level passes to reach level 6
+                for i in range(5):
+                    purchase_response = requests.post(
+                        f"{self.base_url}/shop/purchase",
+                        json={"user_id": low_level_user['id'], "item_id": level_pass['id']},
+                        timeout=10
+                    )
+                    if purchase_response.status_code == 200:
+                        self.log(f"✅ Purchased Level Pass {i+1}/5")
+                    else:
+                        self.log(f"❌ Failed to purchase Level Pass {i+1}: {purchase_response.status_code}")
+                        # Continue anyway, maybe user has enough level
+                        break
+                
+                # Verify user is now level 6+
+                updated_user_response = requests.get(f"{self.base_url}/users/{low_level_user['id']}", timeout=10)
+                if updated_user_response.status_code == 200:
+                    updated_user = updated_user_response.json()
+                    user_level = updated_user.get('level', 1)
+                    if user_level >= 6:
+                        self.log(f"✅ User upgraded to level {user_level}")
+                        low_level_user = updated_user  # Update our test user data
+                    else:
+                        self.log(f"❌ User still at level {user_level}, need level 6+")
+                        return False
+                else:
+                    self.log("❌ Failed to get updated user data")
+                    return False
+            else:
+                self.log("❌ Failed to get current user data")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Error upgrading user to level 6: {str(e)}")
+            return False
+        
+        # Test 3: Test wheel status for level 6+ user (should be able to spin)
+        try:
+            response = requests.get(f"{self.base_url}/wheel/status/{low_level_user['id']}", timeout=10)
+            if response.status_code == 200:
+                status_data = response.json()
+                if status_data.get("can_spin", False):
+                    self.log("✅ Level 6+ user can spin the wheel")
+                    self.log(f"   User level: {status_data.get('user_level')}")
+                else:
+                    self.log(f"❌ Level 6+ user should be able to spin: {status_data}")
+                    return False
+            else:
+                self.log(f"❌ Failed to get wheel status for level 6+ user: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error testing wheel status for level 6+ user: {str(e)}")
+            return False
+        
+        # Test 4: Test wheel spin functionality
+        original_credits = low_level_user.get('credits', 0)
+        try:
+            response = requests.post(
+                f"{self.base_url}/wheel/spin",
+                json={"user_id": low_level_user['id']},
+                timeout=10
+            )
+            if response.status_code == 200:
+                spin_result = response.json()
+                reward = spin_result.get('reward', 0)
+                
+                # Verify reward is in correct range (10-100 FC)
+                if 10 <= reward <= 100:
+                    self.log(f"✅ Wheel spin successful - earned {reward} FC (valid range 10-100)")
+                else:
+                    self.log(f"❌ Wheel reward {reward} FC is outside valid range (10-100)")
+                    return False
+                
+                # Verify success message
+                if spin_result.get('success', False):
+                    self.log("✅ Wheel spin returned success=True")
+                else:
+                    self.log("❌ Wheel spin should return success=True")
+                    return False
+                
+                # Verify next spin availability is tomorrow
+                next_spin = spin_result.get('next_spin_available')
+                if next_spin:
+                    self.log(f"✅ Next spin available: {next_spin}")
+                else:
+                    self.log("❌ Next spin availability not provided")
+                    return False
+                
+            else:
+                self.log(f"❌ Failed to spin wheel: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error spinning wheel: {str(e)}")
+            return False
+        
+        # Test 5: Verify user credits were updated
+        try:
+            response = requests.get(f"{self.base_url}/users/{low_level_user['id']}", timeout=10)
+            if response.status_code == 200:
+                updated_user = response.json()
+                new_credits = updated_user.get('credits', 0)
+                expected_credits = original_credits + reward
+                
+                if new_credits == expected_credits:
+                    self.log(f"✅ User credits updated correctly: {original_credits} + {reward} = {new_credits}")
+                else:
+                    self.log(f"❌ User credits not updated correctly: expected {expected_credits}, got {new_credits}")
+                    return False
+            else:
+                self.log(f"❌ Failed to get updated user data: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error verifying credit update: {str(e)}")
+            return False
+        
+        # Test 6: Test daily limitation - try to spin again (should fail)
+        try:
+            response = requests.post(
+                f"{self.base_url}/wheel/spin",
+                json={"user_id": low_level_user['id']},
+                timeout=10
+            )
+            if response.status_code == 400:
+                error_detail = response.json().get('detail', '')
+                if "once per day" in error_detail.lower():
+                    self.log("✅ Daily limitation enforced - cannot spin twice in same day")
+                else:
+                    self.log(f"❌ Wrong error message for daily limit: {error_detail}")
+                    return False
+            else:
+                self.log(f"❌ Second spin should return 400 error, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error testing daily limitation: {str(e)}")
+            return False
+        
+        # Test 7: Verify wheel status shows already spun today
+        try:
+            response = requests.get(f"{self.base_url}/wheel/status/{low_level_user['id']}", timeout=10)
+            if response.status_code == 200:
+                status_data = response.json()
+                if not status_data.get("can_spin", True) and status_data.get("reason") == "already_spun_today":
+                    self.log("✅ Wheel status correctly shows already spun today")
+                    last_spin = status_data.get('last_spin')
+                    next_spin = status_data.get('next_spin_available')
+                    if last_spin and next_spin:
+                        self.log(f"   Last spin: {last_spin}")
+                        self.log(f"   Next available: {next_spin}")
+                    else:
+                        self.log("❌ Missing last_spin or next_spin_available in status")
+                        return False
+                else:
+                    self.log(f"❌ Wheel status should show already_spun_today: {status_data}")
+                    return False
+            else:
+                self.log(f"❌ Failed to get wheel status after spin: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error checking wheel status after spin: {str(e)}")
+            return False
+        
+        # Test 8: Check for wheel notification
+        try:
+            response = requests.get(f"{self.base_url}/notifications/{low_level_user['id']}", timeout=10)
+            if response.status_code == 200:
+                notifications = response.json()
+                wheel_notifications = [n for n in notifications if n.get("notification_type") == "wheel_reward"]
+                if wheel_notifications:
+                    wheel_notif = wheel_notifications[0]
+                    if str(reward) in wheel_notif.get('message', ''):
+                        self.log(f"✅ Wheel reward notification created: {wheel_notif['message']}")
+                    else:
+                        self.log(f"❌ Wheel notification doesn't contain reward amount: {wheel_notif['message']}")
+                        return False
+                else:
+                    self.log("❌ Wheel reward notification not found")
+                    return False
+            else:
+                self.log(f"❌ Failed to get notifications: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error checking wheel notification: {str(e)}")
+            return False
+        
+        self.log("✅ Daily Wheel Feature tests passed")
+        return True
+    
     def run_all_tests(self):
         """Run all NEW FEATURES test suites"""
         self.log("🚀 Starting Focus Royale NEW FEATURES Backend API Tests")
