@@ -1069,43 +1069,128 @@ function App() {
     }
   };
 
-  // Chart configurations
-  const getChartOptions = () => ({
-    responsive: true,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          color: 'var(--text-primary)'
+  // Enhanced Chart configurations with gradients, glows, and animations
+  const getChartOptions = (chartType = 'default') => {
+    const baseConfig = {
+      responsive: true,
+      interaction: {
+        intersect: false,
+        mode: 'index',
+      },
+      animation: {
+        duration: 2000,
+        easing: 'easeInOutQuart',
+        delay: (context) => {
+          let delay = 0;
+          if (context.type === 'data' && context.mode === 'default') {
+            delay = context.dataIndex * 50 + context.datasetIndex * 100;
+          }
+          return delay;
+        },
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: 'var(--text-primary)',
+            padding: 20,
+            font: {
+              size: 12,
+              weight: 'bold'
+            },
+            usePointStyle: true,
+            pointStyle: 'circle'
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          titleColor: '#ffffff',
+          bodyColor: '#ffffff',
+          borderColor: 'var(--accent-color)',
+          borderWidth: 2,
+          cornerRadius: 12,
+          padding: 16,
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+          titleFont: {
+            size: 14,
+            weight: 'bold'
+          },
+          bodyFont: {
+            size: 13
+          },
+          displayColors: true,
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${context.parsed.y}${chartType === 'bar' ? ' minutes' : ''}`;
+            }
+          }
         }
       },
-      tooltip: {
-        backgroundColor: 'var(--bg-secondary)',
-        titleColor: 'var(--text-primary)',
-        bodyColor: 'var(--text-primary)',
-        borderColor: 'var(--border-color)',
-        borderWidth: 1
-      }
-    },
-    scales: {
-      x: {
-        ticks: {
-          color: 'var(--text-secondary)'
+      scales: {
+        x: {
+          ticks: {
+            color: 'var(--text-secondary)',
+            font: {
+              size: 11,
+              weight: '500'
+            }
+          },
+          grid: {
+            color: 'rgba(100, 100, 100, 0.1)',
+            lineWidth: 1,
+            drawBorder: false
+          },
+          border: {
+            display: false
+          }
         },
-        grid: {
-          color: 'var(--border-color)'
-        }
-      },
-      y: {
-        ticks: {
-          color: 'var(--text-secondary)'
-        },
-        grid: {
-          color: 'var(--border-color)'
+        y: {
+          ticks: {
+            color: 'var(--text-secondary)',
+            font: {
+              size: 11,
+              weight: '500'
+            },
+            callback: function(value) {
+              return chartType === 'bar' ? value + 'm' : value;
+            }
+          },
+          grid: {
+            color: 'rgba(100, 100, 100, 0.1)',
+            lineWidth: 1,
+            drawBorder: false
+          },
+          border: {
+            display: false
+          },
+          beginAtZero: true
         }
       }
-    }
-  });
+    };
+
+    return baseConfig;
+  };
+
+  // Create gradient for bar charts
+  const createBarGradient = (ctx, chartArea) => {
+    if (!chartArea) return null;
+    
+    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.1)');
+    gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.6)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 1)');
+    return gradient;
+  };
+
+  // Create gradient for line charts
+  const createLineGradient = (ctx, chartArea, colors) => {
+    if (!chartArea) return null;
+    
+    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    gradient.addColorStop(0, colors.start);
+    gradient.addColorStop(1, colors.end);
+    return gradient;
+  };
 
   if (!isInitialized) {
     return (
