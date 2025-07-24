@@ -907,6 +907,107 @@ async def get_user_statistics(user_id: str):
         "recent_sessions_count": len(focus_sessions)
     }
 
+# ==================== WHEEL ENDPOINTS ====================
+
+@api_router.get("/wheel/status/{user_id}", response_model=Dict[str, Any])
+async def get_wheel_status(user_id: str):
+    """Check if user can spin the wheel today and get their level"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if user is level 6 or higher
+    if user.get("level", 1) < 6:
+        return {
+            "can_spin": False,
+            "reason": "requires_level_6",
+            "user_level": user.get("level", 1),
+            "required_level": 6
+        }
+    
+    # Check if user has already spun today
+    last_spin = user.get("last_wheel_spin")
+    if last_spin:
+        # Convert string to datetime if needed
+        if isinstance(last_spin, str):
+            last_spin = datetime.fromisoformat(last_spin.replace('Z', '+00:00'))
+        
+        # Check if it's the same day
+        today = datetime.utcnow().date()
+        last_spin_date = last_spin.date()
+        
+        if last_spin_date == today:
+            return {
+                "can_spin": False,
+                "reason": "already_spun_today",
+                "last_spin": last_spin.isoformat(),
+                "next_spin_available": (datetime.combine(today + timedelta(days=1), datetime.min.time())).isoformat()
+            }
+    
+    return {
+        "can_spin": True,
+        "user_level": user.get("level", 1)
+    }
+
+@api_router.post("/wheel/spin", response_model=Dict[str, Any])
+async def spin_wheel(input: Dict[str, str]):
+    """Spin the daily wheel for FC rewards (10-100 FC)"""
+    user_id = input.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="user_id required")
+    
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if user is level 6 or higher
+    if user.get("level", 1) < 6:
+        raise HTTPException(status_code=403, detail="Wheel unlocks at level 6")
+    
+    # Check if user has already spun today
+    last_spin = user.get("last_wheel_spin")
+    if last_spin:
+        # Convert string to datetime if needed
+        if isinstance(last_spin, str):
+            last_spin = datetime.fromisoformat(last_spin.replace('Z', '+00:00'))
+        
+        # Check if it's the same day
+        today = datetime.utcnow().date()
+        last_spin_date = last_spin.date()
+        
+        if last_spin_date == today:
+            raise HTTPException(status_code=400, detail="You can only spin the wheel once per day")
+    
+    # Generate random reward (10-100 FC)
+    import random
+    reward = random.randint(10, 100)
+    
+    # Update user credits and last spin time
+    current_time = datetime.utcnow()
+    await db.users.update_one(
+        {"id": user_id},
+        {
+            "$inc": {"credits": reward},
+            "$set": {"last_wheel_spin": current_time}
+        }
+    )
+    
+    # Create notification for wheel spin
+    notification = Notification(
+        user_id=user_id,
+        message=f"🎰 Daily wheel spin earned you {reward} FC!",
+        type="wheel_reward",
+        created_at=current_time
+    )
+    await db.notifications.insert_one(notification.dict())
+    
+    return {
+        "success": True,
+        "reward": reward,
+        "message": f"Congratulations! You won {reward} FC!",
+        "next_spin_available": (datetime.combine(current_time.date() + timedelta(days=1), datetime.min.time())).isoformat()
+    }
+
 # ==================== ADMIN/UTILITY ENDPOINTS ====================
 
 @api_router.post("/admin/reset-database")
