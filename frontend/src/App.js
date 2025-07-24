@@ -622,6 +622,7 @@ function App() {
       fetchWeeklyTasks();
       fetchSocialRate();
       fetchStatistics();
+      fetchWheelStatus();
       const interval = setInterval(() => {
         fetchActiveUsers();
         fetchUsers();
@@ -629,6 +630,7 @@ function App() {
         fetchTasks();
         fetchWeeklyTasks();
         fetchSocialRate();
+        fetchWheelStatus();
       }, 3000);
 
       return () => clearInterval(interval);
