@@ -1055,10 +1055,16 @@ function App() {
 
   const handleTabClick = (tab) => {
     const requirements = getTabRequirements(tab);
+    
+    // Always allow tab to be set (for locked preview functionality)
+    setActiveTab(tab);
+    
     if (requirements.unlocked) {
-      setActiveTab(tab);
+      // Only fetch data if tab is unlocked
       if (tab === 'statistics') {
         fetchStatistics();
+      } else if (tab === 'wheel') {
+        fetchWheelStatus();
       }
     }
   };
