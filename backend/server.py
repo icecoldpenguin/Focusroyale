@@ -537,8 +537,43 @@ async def complete_task(input: TaskComplete):
         {"$set": {"is_completed": True}}
     )
     
-    # Award credits and update user
+    # Check for Assassin Pass effect - 0 credits for next 3 tasks
     credits_earned = task.get("credits_reward", 10)
+    assassin_active = False
+    
+    # Clean expired effects first
+    await clean_expired_effects()
+    # Get updated user data
+    user = await db.users.find_one({"id": input.user_id})
+    
+    active_effects = user.get("active_effects", [])
+    current_time = datetime.utcnow()
+    
+    for i, effect in enumerate(active_effects):
+        if (effect.get("expires_at") and datetime.fromisoformat(effect["expires_at"]) > current_time and
+            effect.get("type") == "assassin_curse" and effect.get("tasks_remaining", 0) > 0):
+            
+            # Assassin effect is active - no credits for this task
+            credits_earned = 0
+            assassin_active = True
+            
+            # Decrease tasks remaining
+            remaining = effect.get("tasks_remaining", 1) - 1
+            if remaining <= 0:
+                # Remove the effect if no more tasks affected
+                await db.users.update_one(
+                    {"id": input.user_id},
+                    {"$pull": {"active_effects": {"type": "assassin_curse", "tasks_remaining": {"$lte": 1}}}}
+                )
+            else:
+                # Update the remaining count
+                await db.users.update_one(
+                    {"id": input.user_id, "active_effects.type": "assassin_curse"},
+                    {"$set": {"active_effects.$.tasks_remaining": remaining}}
+                )
+            break
+    
+    # Award credits and update user
     await db.users.update_one(
         {"id": input.user_id},
         {
@@ -550,9 +585,13 @@ async def complete_task(input: TaskComplete):
     )
     
     # Create notification for activity feed
+    message = f"{user['username']} has completed the task '{task['title']}'"
+    if assassin_active:
+        message += " (No credits due to Assassin curse)"
+    
     notification = Notification(
         user_id="system",  # System notification for all to see
-        message=f"{user['username']} has completed the task '{task['title']}'",
+        message=message,
         notification_type="task_completed",
         related_user_id=input.user_id
     )
