@@ -415,6 +415,8 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Manual Timer for Focus Sessions"
+    - "Modern Notification System"
     - "Focus Session Tab Close Prevention"
     - "Dark/Light Theme System"
     - "Enhanced Login Page with 3D Elements"
