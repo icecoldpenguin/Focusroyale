@@ -1096,6 +1096,90 @@ async def initialize_shop_items():
             "effect": {"trade_request": True},
             "is_active": True,
             "requires_target": True
+        },
+        # NEW ADVANCED PASSES
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Mirror Pass",
+            "description": "Reflects the next pass used against you back to the original sender",
+            "emoji": "🪞",
+            "price": 250,
+            "item_type": "defensive",
+            "effect": {"mirror_shield": True},
+            "is_active": True,
+            "requires_target": False,
+            "duration_hours": 24
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Dominance Pass",
+            "description": "For 1 hour, all other players earn only 50% of their usual credits",
+            "emoji": "👑",
+            "price": 300,
+            "item_type": "sabotage",
+            "effect": {"global_dominance": True},
+            "is_active": True,
+            "requires_target": False,
+            "duration_hours": 1
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Time Loop Pass",
+            "description": "Instantly repeats your last hour's credit gain. Highly effective after group focus sessions",
+            "emoji": "⏰",
+            "price": 200,
+            "item_type": "boost",
+            "effect": {"time_loop": True},
+            "is_active": True,
+            "requires_target": False
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Immunity Pass",
+            "description": "Grants complete immunity from all negative passes for 48 hours",
+            "emoji": "🛡️",
+            "price": 300,
+            "item_type": "defensive",
+            "effect": {"immunity_shield": True},
+            "is_active": True,
+            "requires_target": False,
+            "duration_hours": 48
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Assassin Pass",
+            "description": "Targeted player earns 0 credits for their next 3 tasks",
+            "emoji": "🗡️",
+            "price": 120,
+            "item_type": "sabotage",
+            "effect": {"assassin_curse": True, "tasks_affected": 3},
+            "is_active": True,
+            "requires_target": True,
+            "duration_hours": 24
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Freeze Pass",
+            "description": "Prevents the targeted player from using any passes for the next 12 hours",
+            "emoji": "🧊",
+            "price": 150,
+            "item_type": "sabotage",
+            "effect": {"freeze_passes": True},
+            "is_active": True,
+            "requires_target": True,
+            "duration_hours": 12
+        },
+        {
+            "id": str(uuid.uuid4()),
+            "name": "Inversion Pass",
+            "description": "Swaps your credit rate multiplier with another player for 60 minutes",
+            "emoji": "🔀",
+            "price": 180,
+            "item_type": "special",
+            "effect": {"inversion_swap": True},
+            "is_active": True,
+            "requires_target": True,
+            "duration_hours": 1
         }
     ]
     
