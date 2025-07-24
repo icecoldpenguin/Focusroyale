@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Focus Royale Backend API Test Suite - NEWLY IMPLEMENTED FEATURES
-Tests the newly implemented backend features as requested:
-1. **Degression Pass Fix**: Test that it now halves the effective rate instead of subtracting 0.5x
-2. **Weekly Tasks System**: Test POST/GET/DELETE weekly tasks endpoints and completion (2 FC reward)
-3. **Study Statistics System**: Test GET /api/statistics/{user_id} endpoint
-4. **Updated Shop Items**: Verify shop initialization includes updated degression pass description
+Focus Royale Backend API Test Suite - USER REGISTRATION TESTING
+Tests the user registration functionality after MongoDB connection string update:
+1. **Registration Endpoint**: Test POST /api/auth/register with new user data
+2. **Username Uniqueness**: Verify unique username registration works
+3. **Duplicate Prevention**: Test duplicate username registration returns error
+4. **Database Persistence**: Verify user data is saved to deployed MongoDB
+5. **Response Format**: Test user object returned correctly without password hash
 """
 
 import requests
