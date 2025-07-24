@@ -1003,7 +1003,7 @@ function App() {
         data: error.response?.data,
         message: error.message
       });
-      alert(error.response?.data?.detail || `${authMode} failed`);
+      showNotification(error.response?.data?.detail || `${authMode} failed`, 'error');
     }
   };
 
