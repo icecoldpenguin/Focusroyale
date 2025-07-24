@@ -1022,10 +1022,10 @@ function App() {
       await fetchUsers();
       await fetchNotifications();
       
-      alert(`Task completed! You earned ${response.data.credits_earned} credits.`);
+      showNotification(`Task completed! You earned ${response.data.credits_earned} credits.`, 'success');
     } catch (error) {
       console.error('Failed to complete task:', error);
-      alert(error.response?.data?.detail || 'Failed to complete task');
+      showNotification(error.response?.data?.detail || 'Failed to complete task', 'error');
     }
   };
 
