@@ -1117,7 +1117,7 @@ function App() {
       await fetchActiveUsers();
     } catch (error) {
       console.error('Failed to start focus session:', error);
-      alert(error.response?.data?.detail || 'Failed to start focus session');
+      showNotification(error.response?.data?.detail || 'Failed to start focus session', 'error');
     }
   };
 
