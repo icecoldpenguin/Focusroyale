@@ -774,11 +774,18 @@ function App() {
     }
 
     try {
+      console.log(`Attempting ${authMode} with:`, {
+        username: authForm.username.trim(),
+        endpoint: `${API}/auth/${authMode === 'login' ? 'login' : 'register'}`
+      });
+      
       const endpoint = authMode === 'login' ? 'login' : 'register';
       const response = await axios.post(`${API}/auth/${endpoint}`, {
         username: authForm.username.trim(),
         password: authForm.password
       });
+      
+      console.log(`${authMode} successful:`, response.data);
       
       setCurrentUser(response.data.user);
       setAuthForm({ username: '', password: '' });
@@ -810,6 +817,11 @@ function App() {
       
     } catch (error) {
       console.error('Auth failed:', error);
+      console.error('Error details:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
       alert(error.response?.data?.detail || `${authMode} failed`);
     }
   };
