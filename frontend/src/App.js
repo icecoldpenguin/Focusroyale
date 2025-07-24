@@ -431,7 +431,7 @@ const UserSettingsModal = ({ isOpen, onClose, currentUser, onUpdateUser }) => {
 
   const handleSaveSettings = async () => {
     if (settings.newPassword && settings.newPassword !== settings.confirmPassword) {
-      showNotification('New passwords do not match', 'error');
+      alert('New passwords do not match');
       return;
     }
 
