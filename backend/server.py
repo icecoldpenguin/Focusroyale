@@ -603,6 +603,36 @@ async def purchase_item(input: PurchaseRequest):
                     }
                 }
             )
+        elif "time_loop" in effect and effect["time_loop"]:
+            # Time Loop Pass - repeat last hour's credit gain
+            # Calculate last hour credits gained from focus sessions
+            one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+            recent_sessions = await db.focus_sessions.find({
+                "user_id": input.user_id,
+                "end_time": {"$exists": True},
+                "end_time": {"$gte": one_hour_ago.isoformat()}
+            }).to_list(1000)
+            
+            total_recent_credits = sum(session.get("credits_earned", 0) for session in recent_sessions)
+            
+            # Award the same amount of credits again
+            await db.users.update_one(
+                {"id": input.user_id},
+                {
+                    "$inc": {
+                        "credits": -item["price"] + total_recent_credits
+                    }
+                }
+            )
+            
+            # Create notification
+            notification = Notification(
+                user_id=input.user_id,
+                message=f"Time Loop activated! Gained {total_recent_credits} FC from repeating last hour's progress",
+                notification_type="time_loop",
+                related_user_id=input.user_id
+            )
+            await db.notifications.insert_one(notification.dict())
     
     elif item["item_type"] == "sabotage" and target_user:
         effect = item["effect"]
