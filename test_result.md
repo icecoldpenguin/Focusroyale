@@ -102,7 +102,41 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "There is a bug where if the user closes the tab, the focus session doesn't end and keeps continuing, we want to prevent that, we will add a prompt using js, where if the person tries to close the tab, the prompt will tell the user to end the focus session first and then leave. Also can you add some animations and flair to the login page? maintain same theme"
+user_problem_statement: "User registration failing on deployed website (Vercel frontend + Railway backend + MongoDB). Backend /api/init and /health endpoints work, shop items initialize successfully, frontend shows login page, but registration attempts show 'register failed' message."
+
+backend:
+  - task: "MongoDB Connection Configuration Fix"
+    implemented: true
+    working: true
+    file: ".env"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "ISSUE IDENTIFIED: Backend was configured with localhost MongoDB URL (mongodb://localhost:27017) which doesn't work in Railway deployment environment. This caused registration endpoint to fail when attempting database operations."
+      - working: true
+        agent: "main"
+        comment: "FIXED: Updated backend/.env with deployed MongoDB connection string: mongodb+srv://focus_royale_user:SBcJTrGwSw9e1fTF@cluster0.wdbbq3a.mongodb.net/focusroyale?retryWrites=true&w=majority&appName=Cluster0. Backend restarted successfully."
+      - working: true
+        agent: "testing"
+        comment: "✅ VERIFIED: Registration system fully functional after MongoDB connection fix. Tested: 1) New user registration with unique usernames works correctly 2) Duplicate username prevention returns proper 400 error 3) User data properly saved to deployed MongoDB 4) Response format correct (no password hash exposed) 5) Initial user values correct (0 credits, 1.0 multiplier, level 1) 6) Database persistence verified. All backend functionality working perfectly."
+
+  - task: "Social Credit Rate System"
+    implemented: true
+    working: true
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented social credit rate system where credit rate = number of users focusing. Modified calculate_effective_credit_rate to include social_multiplier based on active users count. Added GET /api/focus/social-rate endpoint to expose current social rate. Updated credit calculation to use: (duration_minutes / 6) * personal_rate * social_multiplier."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED - Social credit rate system working perfectly. Verified: 1) Social rate endpoint returns correct multipliers (1.0x minimum, scales with active users). 2) Credit calculation formula verified: (duration_minutes / 6) * personal_rate * social_multiplier. 3) Dynamic rate scaling: 0 users = 1.0x, 1 user = 1.0x, 2 users = 2.0x, 3 users = 3.0x. 4) Personal multipliers (Progression Pass) combine correctly with social rate. 5) Temporary effects work on top of social rate. 6) Complete workflow with users joining/leaving dynamically adjusts rates correctly."
 
 backend:
   - task: "User Registration System with MongoDB Connection"
