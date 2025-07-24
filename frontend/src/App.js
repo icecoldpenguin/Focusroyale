@@ -1067,17 +1067,17 @@ function App() {
     e.preventDefault();
     
     if (!newTask.title.trim()) {
-      alert('Please enter a task title');
+      showNotification('Please enter a task title', 'error');
       return;
     }
 
     try {
       await createTask(newTask.title, newTask.description);
       setNewTask({ title: '', description: '' });
-      alert('Task created successfully!');
+      showNotification('Task created successfully!', 'success');
     } catch (error) {
       console.error('Failed to create task:', error);
-      alert(error.response?.data?.detail || 'Failed to create task');
+      showNotification(error.response?.data?.detail || 'Failed to create task', 'error');
     }
   };
 
