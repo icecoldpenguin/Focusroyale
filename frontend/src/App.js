@@ -631,6 +631,9 @@ function App() {
     isSet: false
   });
 
+  // Trade requests state
+  const [tradeRequests, setTradeRequests] = useState([]);
+
   // Notification system functions
   const showNotification = (message, type = 'info') => {
     const id = Date.now() + Math.random();
