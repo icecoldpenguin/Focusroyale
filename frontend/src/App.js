@@ -1674,8 +1674,8 @@ function App() {
                   {/* Charts Grid */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Daily Focus Time Bar Chart */}
-                    <div className="card-enhanced p-6 rounded-lg">
-                      <h3 className="text-lg font-bold mb-4">Daily Focus Time (Last 30 Days)</h3>
+                    <div className="card-enhanced p-6 rounded-lg chart-glow">
+                      <h3 className="text-lg font-bold mb-4 chart-title">📊 Daily Focus Time (Last 7 Days)</h3>
                       <div className="chart-container">
                         <Bar
                           data={{
@@ -1683,12 +1683,39 @@ function App() {
                             datasets: [{
                               label: 'Minutes Focused',
                               data: Object.values(statistics.daily_focus_time).slice(-7),
-                              backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                              backgroundColor: (context) => {
+                                const chart = context.chart;
+                                const {ctx, chartArea} = chart;
+                                if (!chartArea) return 'rgba(59, 130, 246, 0.8)';
+                                return createBarGradient(ctx, chartArea);
+                              },
                               borderColor: 'rgba(59, 130, 246, 1)',
-                              borderWidth: 1
+                              borderWidth: 2,
+                              borderRadius: 8,
+                              borderSkipped: false,
+                              hoverBackgroundColor: 'rgba(59, 130, 246, 0.9)',
+                              hoverBorderColor: 'rgba(37, 99, 235, 1)',
+                              hoverBorderWidth: 3,
+                              shadowColor: 'rgba(59, 130, 246, 0.5)',
+                              shadowBlur: 15,
+                              shadowOffsetX: 0,
+                              shadowOffsetY: 8
                             }]
                           }}
-                          options={getChartOptions()}
+                          options={{
+                            ...getChartOptions('bar'),
+                            plugins: {
+                              ...getChartOptions('bar').plugins,
+                              beforeDraw: (chart) => {
+                                const ctx = chart.ctx;
+                                ctx.save();
+                                ctx.shadowColor = 'rgba(59, 130, 246, 0.3)';
+                                ctx.shadowBlur = 20;
+                                ctx.shadowOffsetX = 2;
+                                ctx.shadowOffsetY = 4;
+                              }
+                            }
+                          }}
                         />
                       </div>
                     </div>
