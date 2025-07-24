@@ -1274,6 +1274,10 @@ body {
   border-left: 4px solid #3b82f6;
 }
 
+.shop-item-defensive {
+  border-left: 4px solid #8b5cf6;
+}
+
 /* Improved Button Hover Effects */
 .btn-enhanced:hover:not(:disabled) {
   transform: translateY(-1px);
