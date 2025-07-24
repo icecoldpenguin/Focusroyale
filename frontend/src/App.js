@@ -575,6 +575,9 @@ function App() {
   const [selectedTargetUsers, setSelectedTargetUsers] = useState({}); // Track selected users for each shop item
   const [statistics, setStatistics] = useState(null);
   const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  const [wheelStatus, setWheelStatus] = useState(null);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [wheelResult, setWheelResult] = useState(null);
 
   // Get tab requirements
   const getTabRequirements = (tab) => {
