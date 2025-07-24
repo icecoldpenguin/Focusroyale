@@ -586,6 +586,8 @@ function App() {
         return { requiredLevel: 3, unlocked: currentUser?.level >= 3 };
       case 'weekly-planner':
         return { requiredLevel: 5, unlocked: currentUser?.level >= 5 };
+      case 'wheel':
+        return { requiredLevel: 6, unlocked: currentUser?.level >= 6 };
       default:
         return { requiredLevel: 1, unlocked: true };
     }
