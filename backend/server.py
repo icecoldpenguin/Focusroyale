@@ -1047,7 +1047,39 @@ async def purchase_item(input: PurchaseRequest):
             await db.notifications.insert_one(notification.dict())
         
         elif "trade_request" in item["effect"]:
-            # Trade Pass - requires mutual consent
+            # Trade Pass - create a trade request requiring mutual consent
+            # For now, create a simple credit swap request (could be enhanced later)
+            user_credits = user.get("credits", 0) - item["price"]  # Credits after purchase
+            target_credits = target_user.get("credits", 0)
+            
+            # Create trade request (proposing equal credit swap for simplicity)
+            trade_amount = min(user_credits, target_credits) // 2  # Propose swapping half of lesser amount
+            if trade_amount < 10:  # Minimum 10 FC trade
+                trade_amount = 10
+                
+            trade_request = TradeRequest(
+                requester_id=input.user_id,
+                target_id=input.target_user_id,
+                requester_credits=trade_amount,
+                target_credits=trade_amount
+            )
+            await db.trade_requests.insert_one(trade_request.dict())
+            
+            # Create notification for target
+            notification = Notification(
+                user_id=input.target_user_id,
+                message=f"{user['username']} wants to trade {trade_amount} FC with you! Check your trade requests.",
+                notification_type="trade_request",
+                related_user_id=input.user_id
+            )
+            await db.notifications.insert_one(notification.dict())
+            
+            # Deduct credits from requester
+            await db.users.update_one(
+                {"id": input.user_id},
+                {"$inc": {"credits": -item["price"]}}
+            )
+            
             mutual_consent_required = True
             effect_applied = False
     
