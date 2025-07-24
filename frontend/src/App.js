@@ -552,6 +552,47 @@ const UserSettingsModal = ({ isOpen, onClose, currentUser, onUpdateUser }) => {
   );
 };
 
+// Notification Container Component
+const NotificationContainer = ({ notifications, onRemove }) => {
+  return (
+    <div className="fixed top-4 right-4 z-50 space-y-2">
+      {notifications.map((notification) => (
+        <div
+          key={notification.id}
+          className={`notification-box p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out animate-slideInRight cursor-pointer min-w-[300px] max-w-[400px] ${
+            notification.type === 'success' 
+              ? 'bg-gradient-to-r from-green-500 to-green-600 text-white' 
+              : notification.type === 'error'
+              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
+              : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+          }`}
+          onClick={() => onRemove(notification.id)}
+        >
+          <div className="flex items-start space-x-2">
+            <div className="flex-shrink-0 mt-0.5">
+              {notification.type === 'success' && <span className="text-lg">✅</span>}
+              {notification.type === 'error' && <span className="text-lg">❌</span>}
+              {notification.type === 'info' && <span className="text-lg">ℹ️</span>}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium leading-5">{notification.message}</p>
+            </div>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove(notification.id);
+              }}
+              className="flex-shrink-0 text-white/80 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 function App() {
   const { darkMode } = useTheme();
   const [currentUser, setCurrentUser] = useState(null);
