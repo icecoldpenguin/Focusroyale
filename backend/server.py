@@ -1228,6 +1228,125 @@ async def delete_weekly_task(task_id: str, user_id: str):
     await db.weekly_tasks.delete_one({"id": task_id})
     return {"success": True}
 
+# ==================== TRADE REQUEST ENDPOINTS ====================
+
+@api_router.get("/trade-requests/{user_id}", response_model=List[TradeRequest])
+async def get_user_trade_requests(user_id: str):
+    """Get pending trade requests for a user (both sent and received)"""
+    # Clean expired requests first
+    await db.trade_requests.delete_many({
+        "expires_at": {"$lt": datetime.utcnow().isoformat()},
+        "status": "pending"
+    })
+    
+    requests = await db.trade_requests.find({
+        "$or": [
+            {"requester_id": user_id},
+            {"target_id": user_id}
+        ],
+        "status": "pending"
+    }).sort("created_at", -1).to_list(50)
+    
+    return [TradeRequest(**req) for req in requests]
+
+@api_router.post("/trade-requests/respond", response_model=Dict[str, Any])
+async def respond_to_trade_request(input: TradeResponse):
+    """Accept or reject a trade request"""
+    # Get trade request
+    trade_request = await db.trade_requests.find_one({
+        "id": input.trade_request_id,
+        "status": "pending"
+    })
+    
+    if not trade_request:
+        raise HTTPException(status_code=404, detail="Trade request not found or already processed")
+    
+    # Check if request has expired
+    if datetime.fromisoformat(trade_request["expires_at"]) < datetime.utcnow():
+        await db.trade_requests.update_one(
+            {"id": input.trade_request_id},
+            {"$set": {"status": "expired"}}
+        )
+        raise HTTPException(status_code=400, detail="Trade request has expired")
+    
+    # Get both users
+    requester = await db.users.find_one({"id": trade_request["requester_id"]})
+    target = await db.users.find_one({"id": trade_request["target_id"]})
+    
+    if not requester or not target:
+        raise HTTPException(status_code=404, detail="One or both users not found")
+    
+    if input.response == "accept":
+        # Check if both users have enough credits
+        requester_credits = requester.get("credits", 0)
+        target_credits = target.get("credits", 0)
+        
+        if requester_credits < trade_request["requester_credits"]:
+            raise HTTPException(status_code=400, detail="Requester doesn't have enough credits")
+        if target_credits < trade_request["target_credits"]:
+            raise HTTPException(status_code=400, detail="You don't have enough credits")
+        
+        # Execute the trade
+        await db.users.update_one(
+            {"id": trade_request["requester_id"]},
+            {"$inc": {"credits": trade_request["target_credits"] - trade_request["requester_credits"]}}
+        )
+        await db.users.update_one(
+            {"id": trade_request["target_id"]},
+            {"$inc": {"credits": trade_request["requester_credits"] - trade_request["target_credits"]}}
+        )
+        
+        # Update trade request status
+        await db.trade_requests.update_one(
+            {"id": input.trade_request_id},
+            {"$set": {"status": "accepted"}}
+        )
+        
+        # Notify both users
+        requester_notification = Notification(
+            user_id=trade_request["requester_id"],
+            message=f"Trade completed! You exchanged {trade_request['requester_credits']} FC for {trade_request['target_credits']} FC with {target['username']}",
+            notification_type="trade_completed",
+            related_user_id=trade_request["target_id"]
+        )
+        target_notification = Notification(
+            user_id=trade_request["target_id"],
+            message=f"Trade completed! You exchanged {trade_request['target_credits']} FC for {trade_request['requester_credits']} FC with {requester['username']}",
+            notification_type="trade_completed",
+            related_user_id=trade_request["requester_id"]
+        )
+        
+        await db.notifications.insert_one(requester_notification.dict())
+        await db.notifications.insert_one(target_notification.dict())
+        
+        return {
+            "success": True,
+            "message": "Trade completed successfully!",
+            "status": "accepted"
+        }
+    
+    else:  # reject
+        # Update trade request status
+        await db.trade_requests.update_one(
+            {"id": input.trade_request_id},
+            {"$set": {"status": "rejected"}}
+        )
+        
+        # Notify requester
+        notification = Notification(
+            user_id=trade_request["requester_id"],
+            message=f"{target['username']} declined your trade request",
+            notification_type="trade_rejected",
+            related_user_id=trade_request["target_id"]
+        )
+        await db.notifications.insert_one(notification.dict())
+        
+        return {
+            "success": True,
+            "message": "Trade request rejected",
+            "status": "rejected"
+        }
+
 # ==================== STUDY STATISTICS ENDPOINTS ====================
 
 @api_router.get("/statistics/{user_id}", response_model=Dict[str, Any])
