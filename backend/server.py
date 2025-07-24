@@ -689,6 +689,66 @@ async def purchase_item(input: PurchaseRequest):
                 {"$push": {"active_effects": degression_effect}}
             )
         
+        elif "global_dominance" in effect and effect["global_dominance"]:
+            # Dominance Pass - all other players earn 50% credits
+            expires_at = datetime.utcnow() + timedelta(hours=item.get("duration_hours", 1))
+            dominance_effect = {
+                "type": "global_dominance",
+                "active": True,
+                "expires_at": expires_at.isoformat(),
+                "applied_by": input.user_id
+            }
+            
+            # Apply dominance effect to the purchaser (they are immune)
+            await db.users.update_one(
+                {"id": input.user_id},
+                {"$push": {"active_effects": dominance_effect}}
+            )
+            
+            # Apply reduced earning effect to ALL other users
+            all_other_users = await db.users.find({"id": {"$ne": input.user_id}}).to_list(1000)
+            for other_user in all_other_users:
+                reduced_effect = {
+                    "type": "dominance_reduced",
+                    "credit_multiplier": 0.5,
+                    "expires_at": expires_at.isoformat(),
+                    "applied_by": input.user_id
+                }
+                await db.users.update_one(
+                    {"id": other_user["id"]},
+                    {"$push": {"active_effects": reduced_effect}}
+                )
+        
+        elif "assassin_curse" in effect and effect["assassin_curse"]:
+            # Assassin Pass - 0 credits for next 3 tasks
+            expires_at = datetime.utcnow() + timedelta(hours=item.get("duration_hours", 24))
+            assassin_effect = {
+                "type": "assassin_curse",
+                "tasks_remaining": effect.get("tasks_affected", 3),
+                "expires_at": expires_at.isoformat(),
+                "applied_by": input.user_id
+            }
+            
+            await db.users.update_one(
+                {"id": input.target_user_id},
+                {"$push": {"active_effects": assassin_effect}}
+            )
+        
+        elif "freeze_passes" in effect and effect["freeze_passes"]:
+            # Freeze Pass - can't use passes for 12 hours
+            expires_at = datetime.utcnow() + timedelta(hours=item.get("duration_hours", 12))
+            freeze_effect = {
+                "type": "freeze_passes",
+                "active": True,
+                "expires_at": expires_at.isoformat(),
+                "applied_by": input.user_id
+            }
+            
+            await db.users.update_one(
+                {"id": input.target_user_id},
+                {"$push": {"active_effects": freeze_effect}}
+            )
+        
         # Deduct credits from purchaser
         await db.users.update_one(
             {"id": input.user_id},
