@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime, timedelta
 
 # Backend URL from frontend/.env
-BASE_URL = "https://09845908-489c-49ce-a853-ac401c0deb92.preview.emergentagent.com/api"
+BASE_URL = "https://e3df0517-0a22-4901-bbef-53950e10818c.preview.emergentagent.com/api"
 
 class FinalSocialRateSystemTester:
     def __init__(self):
