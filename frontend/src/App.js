@@ -719,6 +719,11 @@ function App() {
     }
   };
 
+  const updateUserSession = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    saveUserSession(updatedUser);
+  };
+
   const restoreUserSession = () => {
     try {
       const savedUser = localStorage.getItem('relvl_user');
