@@ -708,6 +708,64 @@ function App() {
     return () => clearInterval(interval);
   }, [timer.isRunning, timer.timeLeft]);
 
+  // Session Management Functions
+  const saveUserSession = (user) => {
+    try {
+      localStorage.setItem('relvl_user', JSON.stringify(user));
+      localStorage.setItem('relvl_login_timestamp', Date.now().toString());
+      console.log('User session saved to localStorage');
+    } catch (error) {
+      console.error('Failed to save user session:', error);
+    }
+  };
+
+  const restoreUserSession = () => {
+    try {
+      const savedUser = localStorage.getItem('relvl_user');
+      const loginTimestamp = localStorage.getItem('relvl_login_timestamp');
+      
+      if (savedUser && loginTimestamp) {
+        // Check if session is not older than 30 days (optional expiration)
+        const sessionAge = Date.now() - parseInt(loginTimestamp);
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000; // 30 days in milliseconds
+        
+        if (sessionAge < thirtyDays) {
+          const user = JSON.parse(savedUser);
+          setCurrentUser(user);
+          console.log('User session restored from localStorage:', user.username);
+          showNotification(`Welcome back, ${user.username}!`, 'success');
+        } else {
+          // Session expired, clear old data
+          clearUserSession();
+          console.log('User session expired, cleared localStorage');
+        }
+      }
+    } catch (error) {
+      console.error('Failed to restore user session:', error);
+      // Clear corrupted data
+      clearUserSession();
+    }
+  };
+
+  const clearUserSession = () => {
+    try {
+      localStorage.removeItem('relvl_user');
+      localStorage.removeItem('relvl_login_timestamp');
+      console.log('User session cleared from localStorage');
+    } catch (error) {
+      console.error('Failed to clear user session:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setAuthForm({ username: '', password: '' });
+    setFocusSession(null);
+    setActiveTab('dashboard');
+    clearUserSession();
+    showNotification('Logged out successfully', 'info');
+  };
+
   // Get tab requirements
   const getTabRequirements = (tab) => {
     switch (tab) {
