@@ -1322,7 +1322,7 @@ function App() {
   };
 
   const handleUpdateUser = (updatedUser) => {
-    setCurrentUser(updatedUser);
+    updateUserSession(updatedUser);
     fetchUsers(); // Refresh users list
   };
 
