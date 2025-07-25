@@ -448,7 +448,7 @@ async def end_focus_session(input: FocusSessionEnd):
     # Calculate credits earned (30 credits per hour = 1 credit per 2 minutes)
     # So credits = duration_minutes / 2 * effective_rate
     base_credits_per_hour = 30
-    minutes_per_credit = 60 / base_credits_per_hour  # 6 minutes per credit
+    minutes_per_credit = 60 / base_credits_per_hour  # 2 minutes per credit
     
     effective_rate = await calculate_effective_credit_rate(user)
     credits_earned = int((duration_minutes / minutes_per_credit) * effective_rate)
