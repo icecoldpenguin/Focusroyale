@@ -1402,7 +1402,7 @@ function App() {
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <div className="text-xl">
           <div className="loading-spinner inline-block mr-3"></div>
-          Initializing Focus Royale...
+          Initializing RELVL...
         </div>
       </div>
     );
