@@ -724,7 +724,7 @@ function App() {
     saveUserSession(updatedUser);
   };
 
-  const restoreUserSession = () => {
+  const restoreUserSession = async () => {
     try {
       const savedUser = localStorage.getItem('relvl_user');
       const loginTimestamp = localStorage.getItem('relvl_login_timestamp');
@@ -736,9 +736,22 @@ function App() {
         
         if (sessionAge < thirtyDays) {
           const user = JSON.parse(savedUser);
-          setCurrentUser(user);
-          console.log('User session restored from localStorage:', user.username);
-          showNotification(`Welcome back, ${user.username}!`, 'success');
+          
+          // Validate session with server to ensure user still exists
+          try {
+            const response = await axios.get(`${API}/users/${user.id}`);
+            const currentUserData = response.data;
+            
+            // Update session with latest user data from server
+            setCurrentUser(currentUserData);
+            saveUserSession(currentUserData);
+            console.log('User session restored and validated:', currentUserData.username);
+            showNotification(`Welcome back, ${currentUserData.username}!`, 'success');
+          } catch (validationError) {
+            console.log('Session validation failed, user may no longer exist');
+            clearUserSession();
+            showNotification('Previous session expired, please login again', 'info');
+          }
         } else {
           // Session expired, clear old data
           clearUserSession();
