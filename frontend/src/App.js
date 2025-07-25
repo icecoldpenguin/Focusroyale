@@ -724,6 +724,17 @@ function App() {
     saveUserSession(updatedUser); // This also updates the timestamp
   };
 
+  const extendUserSession = () => {
+    // Update the login timestamp to extend session
+    if (currentUser) {
+      try {
+        localStorage.setItem('relvl_login_timestamp', Date.now().toString());
+      } catch (error) {
+        console.error('Failed to extend user session:', error);
+      }
+    }
+  };
+
   const restoreUserSession = async () => {
     try {
       const savedUser = localStorage.getItem('relvl_user');
