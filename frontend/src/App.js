@@ -1420,7 +1420,7 @@ function App() {
         </div>
         
         <div className="login-card p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 relative z-10">
-          <h1 className="login-title text-3xl font-bold text-center mb-2">Focus Royale</h1>
+          <h1 className="login-title text-3xl font-bold text-center mb-2">RELVL</h1>
           <p className="login-tagline text-center mb-6 opacity-80">
             Turn focus into currency. Strategy decides who rises.
           </p>
