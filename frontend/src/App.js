@@ -1102,8 +1102,12 @@ function App() {
       
       console.log(`${authMode} successful:`, response.data);
       
-      setCurrentUser(response.data.user);
+      const user = response.data.user;
+      setCurrentUser(user);
+      saveUserSession(user); // Save to localStorage
       setAuthForm({ username: '', password: '' });
+      
+      showNotification(`${authMode === 'login' ? 'Logged in' : 'Registered'} successfully!`, 'success');
       
       // Fetch additional data, but don't fail registration if these fail
       try {
