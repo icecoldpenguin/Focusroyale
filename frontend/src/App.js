@@ -721,7 +721,7 @@ function App() {
 
   const updateUserSession = (updatedUser) => {
     setCurrentUser(updatedUser);
-    saveUserSession(updatedUser);
+    saveUserSession(updatedUser); // This also updates the timestamp
   };
 
   const restoreUserSession = async () => {
