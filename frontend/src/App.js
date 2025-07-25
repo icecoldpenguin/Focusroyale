@@ -776,6 +776,10 @@ function App() {
       await axios.post(`${API}/init`);
       await fetchShopItems();
       await fetchSocialRate();
+      
+      // Check for active sessions on page load
+      await checkForActiveSession();
+      
       setIsInitialized(true);
       console.log('App initialized successfully');
     } catch (error) {
@@ -784,6 +788,65 @@ function App() {
       
       // Try to continue even if initialization fails
       setIsInitialized(true);
+    }
+  };
+
+  const checkForActiveSession = async () => {
+    if (!currentUser) return;
+    
+    try {
+      console.log('Checking for active focus session...');
+      
+      // Get current user data to check session status
+      const response = await axios.get(`${API}/users`);
+      const user = response.data.find(u => u.id === currentUser.id);
+      
+      if (user && user.current_session_start && user.is_focusing) {
+        console.log('Found active focus session, resuming...');
+        
+        // Calculate session duration
+        const startTime = new Date(user.current_session_start);
+        const currentTime = new Date();
+        const durationMinutes = Math.floor((currentTime - startTime) / (1000 * 60));
+        
+        // Set focus session state to resume the session
+        setFocusSession({
+          id: 'resumed-session',
+          start_time: user.current_session_start,
+          user_id: user.id,
+          is_active: true
+        });
+        
+        // Show notification about resumed session
+        showNotification(`Resumed focus session (${durationMinutes} minutes elapsed)`, 'info');
+        
+      } else if (user && user.current_session_start && !user.is_focusing) {
+        console.log('Found stuck session, ending automatically...');
+        
+        // End the stuck session
+        try {
+          const endResponse = await axios.post(`${API}/focus/end`, {
+            user_id: currentUser.id
+          });
+          
+          showNotification(`Previous session ended: earned ${endResponse.data.credits_earned} FC for ${endResponse.data.duration_minutes} minutes`, 'success');
+          
+          // Update user data
+          setCurrentUser(prevUser => ({
+            ...prevUser,
+            credits: endResponse.data.total_credits,
+            is_focusing: false,
+            current_session_start: null
+          }));
+          
+        } catch (endError) {
+          console.error('Failed to end stuck session:', endError);
+          showNotification('Found previous session but failed to end it automatically', 'error');
+        }
+      }
+      
+    } catch (error) {
+      console.error('Failed to check for active session:', error);
     }
   };
 
