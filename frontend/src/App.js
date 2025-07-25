@@ -862,6 +862,7 @@ function App() {
         fetchWeeklyTasks();
         fetchSocialRate();
         fetchWheelStatus();
+        extendUserSession(); // Extend session on activity
       }, 3000);
 
       return () => clearInterval(interval);
