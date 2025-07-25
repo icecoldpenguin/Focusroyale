@@ -437,6 +437,19 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+backend:
+  - task: "Focus Credits Rate Update"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated focus credits rate from 10FC/hour to 30FC/hour at 1.0x effective credit rate. Changed base_credits_per_hour from 10 to 30, which automatically scales to 60FC/hour at 2.0x rate, 90FC/hour at 3.0x rate, etc. Credit calculation now: credits_earned = (duration_minutes / 2) * effective_rate instead of (duration_minutes / 6) * effective_rate."
+
 agent_communication:
   - agent: "main"
     message: "🔧 CRITICAL ISSUE RESOLVED! Fixed user registration failure on deployed website. Root cause: Backend was configured with localhost MongoDB URL which doesn't work in Railway deployment. Updated to deployed MongoDB connection string. Backend restarted successfully."
