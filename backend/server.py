@@ -514,8 +514,8 @@ async def get_social_rate():
     return {
         "active_users_count": active_users_count,
         "social_multiplier": social_multiplier,
-        "credits_per_hour": social_multiplier * 10,  # Base 10 credits/hour * multiplier
-        "description": f"{active_users_count} users focusing = {social_multiplier}x rate = {social_multiplier * 10} credits/hour"
+        "credits_per_hour": social_multiplier * 30,  # Base 30 credits/hour * multiplier
+        "description": f"{active_users_count} users focusing = {social_multiplier}x rate = {social_multiplier * 30} credits/hour"
     }
 
 # ==================== TASKS ENDPOINTS ====================
