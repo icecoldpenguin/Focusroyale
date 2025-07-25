@@ -754,6 +754,10 @@ function App() {
       fetchSocialRate();
       fetchStatistics();
       fetchWheelStatus();
+      
+      // Check for active sessions when user logs in
+      checkForActiveSession();
+      
       const interval = setInterval(() => {
         fetchActiveUsers();
         fetchUsers();
