@@ -1561,7 +1561,7 @@ function App() {
                       Started at {new Date(focusSession.start_time).toLocaleTimeString()}
                     </div>
                     <div className="text-sm text-green-600 mt-2">
-                      Earning {(socialRate.social_multiplier * currentUser.credit_rate_multiplier * 10).toFixed(1)} FC per hour
+                      Earning {(socialRate.social_multiplier * currentUser.credit_rate_multiplier * 30).toFixed(1)} FC per hour
                     </div>
                     <div className="text-xs text-green-600">
                       Social: {socialRate.social_multiplier.toFixed(1)}x • Personal: {currentUser.credit_rate_multiplier.toFixed(1)}x
