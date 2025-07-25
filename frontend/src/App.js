@@ -746,8 +746,9 @@ function App() {
     };
   }, [focusSession, currentUser]);
 
-  // Initialize data on component mount
+  // Initialize data and restore user session on component mount
   useEffect(() => {
+    restoreUserSession();
     initializeData();
   }, []);
 
