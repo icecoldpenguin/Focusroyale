@@ -739,6 +739,7 @@ function App() {
   };
 
   const restoreUserSession = async () => {
+    setIsRestoringSession(true);
     try {
       const savedUser = localStorage.getItem('relvl_user');
       const loginTimestamp = localStorage.getItem('relvl_login_timestamp');
@@ -776,6 +777,8 @@ function App() {
       console.error('Failed to restore user session:', error);
       // Clear corrupted data
       clearUserSession();
+    } finally {
+      setIsRestoringSession(false);
     }
   };
 
