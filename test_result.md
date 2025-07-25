@@ -432,13 +432,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Manual Timer for Focus Sessions"
-    - "Modern Notification System"
-    - "Focus Session Tab Close Prevention"
-    - "Dark/Light Theme System"
-    - "Enhanced Login Page with 3D Elements"
-    - "Overall Enhanced Styling and Animations"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
