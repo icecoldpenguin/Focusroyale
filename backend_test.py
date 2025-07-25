@@ -189,8 +189,8 @@ class FocusRoyaleNewFeaturesAPITester:
         return True
     
     def test_updated_credit_rate(self):
-        """Test NEW Credit Rate: 10 credits/hour = 1 credit per 6 minutes"""
-        self.log("\n=== Testing Updated Credit Rate (10 credits/hour) ===")
+        """Test NEW Credit Rate: 30 credits/hour = 1 credit per 2 minutes"""
+        self.log("\n=== Testing Updated Credit Rate (30 credits/hour) ===")
         
         if not self.test_users:
             self.log("❌ No test users available for credit rate testing")
@@ -199,62 +199,75 @@ class FocusRoyaleNewFeaturesAPITester:
         user = self.test_users[0]
         user_id = user['id']
         
-        # Test 1: Start focus session
-        try:
-            response = requests.post(
-                f"{self.base_url}/focus/start",
-                json={"user_id": user_id},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                session_data = response.json()
-                self.log(f"✅ Started focus session for user {user['username']}")
-            else:
-                self.log(f"❌ Failed to start focus session: {response.status_code} - {response.text}")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Error starting focus session: {str(e)}")
-            return False
+        # Test different session durations to verify the new 30FC/hour rate
+        test_durations = [
+            {"seconds": 2, "expected_minutes": 2, "description": "2 minutes"},
+            {"seconds": 6, "expected_minutes": 6, "description": "6 minutes"}, 
+            {"seconds": 12, "expected_minutes": 12, "description": "12 minutes"},
+            {"seconds": 60, "expected_minutes": 60, "description": "60 minutes"}
+        ]
         
-        # Test 2: Wait 7 seconds to simulate 7 minutes of focus time (should earn 1+ credits)
-        self.log("Waiting 7 seconds to simulate 7 minutes of focus time...")
-        time.sleep(7)  # Simulating 7 minutes
-        
-        try:
-            response = requests.post(
-                f"{self.base_url}/focus/end",
-                json={"user_id": user_id},
-                timeout=10
-            )
+        for test_case in test_durations:
+            self.log(f"\n--- Testing {test_case['description']} session ---")
             
-            if response.status_code == 200:
-                end_data = response.json()
-                self.log(f"✅ Ended focus session")
+            # Test 1: Start focus session
+            try:
+                response = requests.post(
+                    f"{self.base_url}/focus/start",
+                    json={"user_id": user_id},
+                    timeout=10
+                )
                 
-                # Verify NEW credit calculation: duration_minutes / 6 * effective_rate
-                duration = end_data.get('duration_minutes', 0)
-                credits_earned = end_data.get('credits_earned', 0)
-                effective_rate = end_data.get('effective_rate', 1.0)
-                
-                # Expected credits = duration / 6 * effective_rate (rounded down)
-                expected_credits = int((duration / 6) * effective_rate)
-                
-                if credits_earned == expected_credits:
-                    self.log(f"✅ NEW Credit calculation correct: {duration} min / 6 * {effective_rate} = {credits_earned} credits")
+                if response.status_code == 200:
+                    session_data = response.json()
+                    self.log(f"✅ Started focus session for user {user['username']}")
                 else:
-                    self.log(f"❌ NEW Credit calculation wrong: expected {expected_credits}, got {credits_earned}")
-                    self.log(f"   Formula: {duration} minutes / 6 * {effective_rate} rate = {expected_credits}")
+                    self.log(f"❌ Failed to start focus session: {response.status_code} - {response.text}")
                     return False
                     
-            else:
-                self.log(f"❌ Failed to end focus session: {response.status_code} - {response.text}")
+            except Exception as e:
+                self.log(f"❌ Error starting focus session: {str(e)}")
                 return False
+            
+            # Test 2: Wait specified time to simulate focus duration
+            self.log(f"Waiting {test_case['seconds']} seconds to simulate {test_case['description']} of focus time...")
+            time.sleep(test_case['seconds'])
+            
+            try:
+                response = requests.post(
+                    f"{self.base_url}/focus/end",
+                    json={"user_id": user_id},
+                    timeout=10
+                )
                 
-        except Exception as e:
-            self.log(f"❌ Error ending focus session: {str(e)}")
-            return False
+                if response.status_code == 200:
+                    end_data = response.json()
+                    self.log(f"✅ Ended focus session")
+                    
+                    # Verify NEW credit calculation: duration_minutes / 2 * effective_rate
+                    # (30 credits/hour = 1 credit per 2 minutes)
+                    duration = end_data.get('duration_minutes', 0)
+                    credits_earned = end_data.get('credits_earned', 0)
+                    effective_rate = end_data.get('effective_rate', 1.0)
+                    
+                    # Expected credits = duration / 2 * effective_rate (rounded down)
+                    expected_credits = int((duration / 2) * effective_rate)
+                    
+                    if credits_earned == expected_credits:
+                        self.log(f"✅ NEW Credit calculation correct: {duration} min / 2 * {effective_rate} = {credits_earned} credits")
+                        self.log(f"   Rate: {credits_earned * 60 / duration:.1f} FC/hour at {effective_rate}x rate")
+                    else:
+                        self.log(f"❌ NEW Credit calculation wrong: expected {expected_credits}, got {credits_earned}")
+                        self.log(f"   Formula: {duration} minutes / 2 * {effective_rate} rate = {expected_credits}")
+                        return False
+                        
+                else:
+                    self.log(f"❌ Failed to end focus session: {response.status_code} - {response.text}")
+                    return False
+                    
+            except Exception as e:
+                self.log(f"❌ Error ending focus session: {str(e)}")
+                return False
         
         self.log("✅ Updated Credit Rate tests passed")
         return True
