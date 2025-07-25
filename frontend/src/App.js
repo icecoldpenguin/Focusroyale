@@ -905,12 +905,12 @@ function App() {
           showNotification(`Previous session ended: earned ${endResponse.data.credits_earned} FC for ${endResponse.data.duration_minutes} minutes`, 'success');
           
           // Update user data
-          setCurrentUser(prevUser => ({
-            ...prevUser,
+          updateUserSession({
+            ...currentUser,
             credits: endResponse.data.total_credits,
             is_focusing: false,
             current_session_start: null
-          }));
+          });
           
         } catch (endError) {
           console.error('Failed to end stuck session:', endError);
