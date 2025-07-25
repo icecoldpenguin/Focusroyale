@@ -1276,7 +1276,7 @@ function App() {
       resetTimer();
       
       const updatedUser = await axios.get(`${API}/users/${currentUser.id}`);
-      setCurrentUser(updatedUser.data);
+      updateUserSession(updatedUser.data);
       
       await fetchActiveUsers();
       await fetchUsers();
