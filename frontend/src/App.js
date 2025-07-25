@@ -1514,12 +1514,12 @@ function App() {
     return gradient;
   };
 
-  if (!isInitialized) {
+  if (!isInitialized || isRestoringSession) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <div className="text-xl">
           <div className="loading-spinner inline-block mr-3"></div>
-          Initializing RELVL...
+          {isRestoringSession ? 'Restoring session...' : 'Initializing RELVL...'}
         </div>
       </div>
     );
