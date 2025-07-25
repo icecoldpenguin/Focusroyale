@@ -824,8 +824,11 @@ function App() {
 
   // Initialize data and restore user session on component mount
   useEffect(() => {
-    restoreUserSession();
-    initializeData();
+    const initializeApp = async () => {
+      await restoreUserSession();
+      await initializeData();
+    };
+    initializeApp();
   }, []);
 
   // Set up polling for real-time updates when user is logged in
