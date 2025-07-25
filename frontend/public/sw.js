@@ -1,4 +1,4 @@
-const CACHE_NAME = 'focus-royale-v1';
+const CACHE_NAME = 'relvl-v1';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',
