@@ -1612,9 +1612,10 @@ function App() {
             </button>
             <ThemeToggle />
             <button
-              onClick={() => setCurrentUser(null)}
+              onClick={handleLogout}
               className="btn-enhanced px-3 py-1 rounded"
               style={{ backgroundColor: 'var(--bg-tertiary)' }}
+              title="Logout"
             >
               Logout
             </button>
