@@ -32,7 +32,7 @@ ChartJS.register(
 const ThemeContext = createContext();
 const useTheme = () => useContext(ThemeContext);
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://focusroyale-production.up.railway.app';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || import.meta.env.REACT_APP_BACKEND_URL || 'https://successful-contentment-production.up.railway.app';
 const API = `${BACKEND_URL}/api`;
 
 console.log('Backend URL:', BACKEND_URL);
