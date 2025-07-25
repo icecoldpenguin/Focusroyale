@@ -786,6 +786,21 @@ function App() {
     }
   };
 
+  const getSessionInfo = () => {
+    try {
+      const loginTimestamp = localStorage.getItem('relvl_login_timestamp');
+      if (loginTimestamp && currentUser) {
+        const sessionAge = Date.now() - parseInt(loginTimestamp);
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        const daysLeft = Math.ceil((thirtyDays - sessionAge) / (24 * 60 * 60 * 1000));
+        return daysLeft > 0 ? daysLeft : 0;
+      }
+    } catch (error) {
+      console.error('Failed to get session info:', error);
+    }
+    return null;
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
     setAuthForm({ username: '', password: '' });
