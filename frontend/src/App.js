@@ -725,9 +725,14 @@ function App() {
   // beforeunload handler to prevent tab close during active focus session
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (focusSession) {
+      if (focusSession && currentUser) {
+        // Try to end the session before leaving (best effort)
+        navigator.sendBeacon(`${API}/focus/end`, JSON.stringify({
+          user_id: currentUser.id
+        }));
+        
         e.preventDefault();
-        e.returnValue = 'You have an active focus session. Please end your session before leaving to save your progress.';
+        e.returnValue = 'You have an active focus session. Your session will be saved automatically.';
         return e.returnValue;
       }
     };
@@ -739,7 +744,7 @@ function App() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [focusSession]);
+  }, [focusSession, currentUser]);
 
   // Initialize data on component mount
   useEffect(() => {
