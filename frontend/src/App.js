@@ -1160,7 +1160,7 @@ function App() {
       });
       
       const updatedUser = await axios.get(`${API}/users/${currentUser.id}`);
-      setCurrentUser(updatedUser.data);
+      updateUserSession(updatedUser.data);
       
       await fetchUsers();
       await fetchNotifications();
