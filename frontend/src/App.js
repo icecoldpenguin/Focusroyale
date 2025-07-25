@@ -708,6 +708,9 @@ function App() {
     return () => clearInterval(interval);
   }, [timer.isRunning, timer.timeLeft]);
 
+  // Add loading state for session restoration
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
+
   // Session Management Functions
   const saveUserSession = (user) => {
     try {
