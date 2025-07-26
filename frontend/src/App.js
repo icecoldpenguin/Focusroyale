@@ -2342,15 +2342,15 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Real-time Activity Tracker */}
+                    {/* Hourly Activity Tracker */}
                     <div className="card-enhanced p-6 rounded-lg chart-glow chart-realtime">
-                      <h3 className="text-lg font-bold mb-4 chart-title">⚡ Real-time Activity</h3>
+                      <h3 className="text-lg font-bold mb-4 chart-title">⚡ Hourly Activity Tracker</h3>
                       <div className="chart-container-enhanced">
                         <Line
                           data={{
                             labels: realtimeData.map(d => d.time),
                             datasets: [{
-                              label: 'Activity Level',
+                              label: 'Activity Level (Last 12 Hours)',
                               data: realtimeData.map(d => d.activity),
                               borderColor: 'rgba(16, 185, 129, 1)',
                               backgroundColor: (context) => {
