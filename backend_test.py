@@ -1388,6 +1388,208 @@ class FocusRoyaleNewFeaturesAPITester:
         self.log("✅ Daily Wheel Feature tests passed")
         return True
     
+    def test_statistics_endpoint(self):
+        """Test Statistics Endpoint for Enhanced Statistics Tab"""
+        self.log("\n=== Testing Statistics Endpoint ===")
+        
+        if not self.test_users:
+            self.log("❌ No test users available for statistics testing")
+            return False
+        
+        user = self.test_users[0]
+        user_id = user['id']
+        
+        # Test 1: Basic statistics endpoint access
+        try:
+            response = requests.get(f"{self.base_url}/statistics/{user_id}", timeout=10)
+            if response.status_code == 200:
+                stats_data = response.json()
+                self.log("✅ Statistics endpoint accessible")
+            else:
+                self.log(f"❌ Failed to access statistics endpoint: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error accessing statistics endpoint: {str(e)}")
+            return False
+        
+        # Test 2: Verify response structure contains all required fields
+        required_fields = {
+            'user_stats': ['total_focus_time', 'total_credits', 'current_level', 'credit_rate', 
+                          'regular_tasks_completed', 'weekly_tasks_completed', 'total_tasks_completed'],
+            'daily_focus_time': [],  # Should be a dict
+            'daily_credits': [],     # Should be a dict
+            'weekly_breakdown': [],  # Should be an array
+            'recent_sessions_count': []  # Should be a number
+        }
+        
+        for main_field, sub_fields in required_fields.items():
+            if main_field not in stats_data:
+                self.log(f"❌ Missing required field: {main_field}")
+                return False
+            
+            if main_field == 'user_stats':
+                user_stats = stats_data[main_field]
+                for sub_field in sub_fields:
+                    if sub_field not in user_stats:
+                        self.log(f"❌ Missing user_stats field: {sub_field}")
+                        return False
+                self.log("✅ user_stats contains all required fields")
+            
+            elif main_field in ['daily_focus_time', 'daily_credits']:
+                if not isinstance(stats_data[main_field], dict):
+                    self.log(f"❌ {main_field} should be a dict/object")
+                    return False
+                self.log(f"✅ {main_field} is correctly formatted as object")
+            
+            elif main_field == 'weekly_breakdown':
+                if not isinstance(stats_data[main_field], list):
+                    self.log(f"❌ {main_field} should be an array")
+                    return False
+                self.log(f"✅ {main_field} is correctly formatted as array")
+            
+            elif main_field == 'recent_sessions_count':
+                if not isinstance(stats_data[main_field], int):
+                    self.log(f"❌ {main_field} should be a number")
+                    return False
+                self.log(f"✅ {main_field} is correctly formatted as number")
+        
+        # Test 3: Verify data types and values
+        user_stats = stats_data['user_stats']
+        
+        # Check numeric fields
+        numeric_fields = ['total_focus_time', 'total_credits', 'current_level', 'credit_rate',
+                         'regular_tasks_completed', 'weekly_tasks_completed', 'total_tasks_completed']
+        
+        for field in numeric_fields:
+            value = user_stats[field]
+            if not isinstance(value, (int, float)):
+                self.log(f"❌ {field} should be numeric, got {type(value)}")
+                return False
+            if value < 0:
+                self.log(f"❌ {field} should not be negative, got {value}")
+                return False
+        
+        self.log("✅ All user_stats fields have correct data types and non-negative values")
+        
+        # Test 4: Verify weekly_breakdown structure
+        weekly_breakdown = stats_data['weekly_breakdown']
+        if len(weekly_breakdown) > 0:
+            required_week_fields = ['week_start', 'focus_minutes', 'credits_earned', 'sessions_count']
+            for week_data in weekly_breakdown:
+                for field in required_week_fields:
+                    if field not in week_data:
+                        self.log(f"❌ Missing weekly_breakdown field: {field}")
+                        return False
+                
+                # Verify data types
+                if not isinstance(week_data['week_start'], str):
+                    self.log(f"❌ week_start should be string (date), got {type(week_data['week_start'])}")
+                    return False
+                
+                for numeric_field in ['focus_minutes', 'credits_earned', 'sessions_count']:
+                    if not isinstance(week_data[numeric_field], (int, float)):
+                        self.log(f"❌ {numeric_field} should be numeric, got {type(week_data[numeric_field])}")
+                        return False
+            
+            self.log(f"✅ weekly_breakdown contains {len(weekly_breakdown)} weeks with correct structure")
+        else:
+            self.log("✅ weekly_breakdown is empty (expected for new user)")
+        
+        # Test 5: Create some test data and verify statistics update
+        self.log("\n--- Creating test data for statistics verification ---")
+        
+        # Create a focus session to generate statistics data
+        try:
+            # Start focus session
+            response = requests.post(
+                f"{self.base_url}/focus/start",
+                json={"user_id": user_id},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                self.log("✅ Started focus session for statistics test")
+                
+                # Wait 3 seconds to simulate focus time
+                time.sleep(3)
+                
+                # End focus session
+                response = requests.post(
+                    f"{self.base_url}/focus/end",
+                    json={"user_id": user_id},
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    end_data = response.json()
+                    credits_earned = end_data.get('credits_earned', 0)
+                    duration_minutes = end_data.get('duration_minutes', 0)
+                    self.log(f"✅ Ended focus session: {duration_minutes} minutes, {credits_earned} credits")
+                else:
+                    self.log(f"❌ Failed to end focus session: {response.status_code}")
+                    return False
+            else:
+                self.log(f"❌ Failed to start focus session: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error creating focus session for statistics: {str(e)}")
+            return False
+        
+        # Test 6: Verify statistics reflect the new data
+        try:
+            response = requests.get(f"{self.base_url}/statistics/{user_id}", timeout=10)
+            if response.status_code == 200:
+                updated_stats = response.json()
+                
+                # Check if recent_sessions_count increased
+                if updated_stats['recent_sessions_count'] > 0:
+                    self.log("✅ recent_sessions_count reflects new focus session")
+                else:
+                    self.log("❌ recent_sessions_count should be > 0 after focus session")
+                    return False
+                
+                # Check if daily data contains today's entry
+                from datetime import datetime
+                today = datetime.utcnow().strftime("%Y-%m-%d")
+                
+                daily_focus = updated_stats['daily_focus_time']
+                daily_credits = updated_stats['daily_credits']
+                
+                if today in daily_focus and daily_focus[today] > 0:
+                    self.log(f"✅ daily_focus_time contains today's data: {daily_focus[today]} minutes")
+                else:
+                    self.log("❌ daily_focus_time should contain today's focus time")
+                    return False
+                
+                if today in daily_credits and daily_credits[today] > 0:
+                    self.log(f"✅ daily_credits contains today's data: {daily_credits[today]} credits")
+                else:
+                    self.log("❌ daily_credits should contain today's credits")
+                    return False
+                
+            else:
+                self.log(f"❌ Failed to get updated statistics: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error verifying updated statistics: {str(e)}")
+            return False
+        
+        # Test 7: Test with invalid user ID
+        try:
+            invalid_user_id = "invalid-user-id-12345"
+            response = requests.get(f"{self.base_url}/statistics/{invalid_user_id}", timeout=10)
+            if response.status_code == 404:
+                self.log("✅ Statistics endpoint correctly returns 404 for invalid user ID")
+            else:
+                self.log(f"❌ Expected 404 for invalid user ID, got {response.status_code}")
+                return False
+        except Exception as e:
+            self.log(f"❌ Error testing invalid user ID: {str(e)}")
+            return False
+        
+        self.log("✅ Statistics Endpoint tests passed - All required fields present and working correctly")
+        return True
+    
     def run_leaderboard_sorting_test(self):
         """Run ONLY the leaderboard sorting test"""
         self.log("🚀 Starting Focus Royale LEADERBOARD SORTING Test")
