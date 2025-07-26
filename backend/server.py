@@ -379,7 +379,8 @@ async def get_user(user_id: str):
 @api_router.get("/leaderboard", response_model=List[Dict[str, Any]])
 async def get_leaderboard():
     await clean_expired_effects()
-    users = await db.users.find().sort("credits", -1).limit(10).to_list(10)
+    # Sort by level first (descending), then by credits (descending)
+    users = await db.users.find().sort([("level", -1), ("credits", -1)]).limit(10).to_list(10)
     # Convert ObjectId to string and remove password hashes
     result = []
     for user in users:
