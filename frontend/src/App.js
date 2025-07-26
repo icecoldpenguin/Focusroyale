@@ -871,6 +871,7 @@ function App() {
       fetchSocialRate();
       fetchStatistics();
       fetchWheelStatus();
+      fetchTradeRequests();
       
       // Check for active sessions when user logs in
       checkForActiveSession();
