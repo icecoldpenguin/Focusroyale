@@ -1811,9 +1811,9 @@ function App() {
     { id: 'dashboard', label: 'Dashboard', requiredLevel: 1 },
     { id: 'shop', label: 'Shop', requiredLevel: 1 },
     { id: 'tasks', label: 'Tasks', requiredLevel: 1 },
-    { id: 'statistics', label: 'Statistics', requiredLevel: 1 },
+    { id: 'statistics', label: 'Statistics', requiredLevel: 3 },
     { id: 'weekly-planner', label: 'Weekly Planner', requiredLevel: 5 },
-    { id: 'wheel', label: 'Daily Wheel', requiredLevel: 6 },
+    { id: 'wheel', label:'Daily Wheel', requiredLevel: 6 },
     { id: 'leaderboard', label: 'Leaderboard', requiredLevel: 1 },
     { id: 'activity', label: 'Activity', requiredLevel: 1 }
   ];
