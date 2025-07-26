@@ -1709,6 +1709,189 @@ async def initialize_shop_items():
         print(f"Error initializing shop items: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to initialize shop items: {str(e)}")
 
+@api_router.post("/fix-shop-duplicates")
+async def fix_shop_duplicates():
+    """Remove duplicate shop items and ensure clean single set"""
+    try:
+        # Delete all existing shop items to start fresh
+        delete_result = await db.shop_items.delete_many({})
+        print(f"Deleted {delete_result.deleted_count} existing shop items")
+        
+        # Add the complete set of shop items (6 original + 7 advanced)
+        all_items = [
+            # Original 6 passes
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Level Pass",
+                "description": "Move up 1 Level (unlocks prestige perks, leaderboard advantage, or visual flex)",
+                "emoji": "🎟️",
+                "price": 100,
+                "item_type": "level",
+                "effect": {"level_increase": 1},
+                "is_active": True,
+                "requires_target": False
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Progression Pass",
+                "description": "Increase your credit/hr rate by +0.5x permanently",
+                "emoji": "⚡",
+                "price": 80,
+                "item_type": "boost",
+                "effect": {"credit_rate_multiplier": 0.5},
+                "is_active": True,
+                "requires_target": False
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Degression Pass",
+                "description": "Select someone → their credit rate is halved for 24 hours",
+                "emoji": "💀",
+                "price": 120,
+                "item_type": "sabotage",
+                "effect": {"rate_halved": True},
+                "is_active": True,
+                "requires_target": True,
+                "duration_hours": 24
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Reset Pass",
+                "description": "Reset another player's FC to 0 — yes, full wipeout. Use with caution (or pure rage)",
+                "emoji": "🔥",
+                "price": 500,
+                "item_type": "sabotage",
+                "effect": {"reset_credits": True},
+                "is_active": True,
+                "requires_target": True
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Ally Token",
+                "description": "Forms a 'Focus Link' with a chosen player: both get +1x extra credit rate for 3 hours",
+                "emoji": "🤝",
+                "price": 60,
+                "item_type": "special",
+                "effect": {"ally_boost": 1.0},
+                "is_active": True,
+                "requires_target": True,
+                "duration_hours": 3
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Trade Pass",
+                "description": "Trade FC with another player (needs mutual consent)",
+                "emoji": "🔄",
+                "price": 50,
+                "item_type": "special",
+                "effect": {"trade_request": True},
+                "is_active": True,
+                "requires_target": True
+            },
+            # Advanced 7 passes
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Mirror Pass",
+                "description": "Reflects the next pass used against you back to the original sender",
+                "emoji": "🪞",
+                "price": 250,
+                "item_type": "defensive",
+                "effect": {"mirror_shield": True},
+                "is_active": True,
+                "requires_target": False,
+                "duration_hours": 24
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Dominance Pass",
+                "description": "For 1 hour, all other players earn only 50% of their usual credits",
+                "emoji": "👑",
+                "price": 300,
+                "item_type": "sabotage",
+                "effect": {"global_dominance": True},
+                "is_active": True,
+                "requires_target": False,
+                "duration_hours": 1
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Time Loop Pass",
+                "description": "Instantly repeats your last hour's credit gain. Highly effective after group focus sessions",
+                "emoji": "⏰",
+                "price": 200,
+                "item_type": "boost",
+                "effect": {"time_loop": True},
+                "is_active": True,
+                "requires_target": False
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Immunity Pass",
+                "description": "Grants complete immunity from all negative passes for 48 hours",
+                "emoji": "🛡️",
+                "price": 300,
+                "item_type": "defensive",
+                "effect": {"immunity_shield": True},
+                "is_active": True,
+                "requires_target": False,
+                "duration_hours": 48
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Assassin Pass",
+                "description": "Targeted player earns 0 credits for their next 3 tasks",
+                "emoji": "🗡️",
+                "price": 120,
+                "item_type": "sabotage",
+                "effect": {"assassin_curse": True, "tasks_affected": 3},
+                "is_active": True,
+                "requires_target": True,
+                "duration_hours": 24
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Freeze Pass",
+                "description": "Prevents the targeted player from using any passes for the next 12 hours",
+                "emoji": "🧊",
+                "price": 150,
+                "item_type": "sabotage",
+                "effect": {"freeze_passes": True},
+                "is_active": True,
+                "requires_target": True,
+                "duration_hours": 12
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "name": "Inversion Pass",
+                "description": "Swaps your credit rate multiplier with another player for 60 minutes",
+                "emoji": "🔀",
+                "price": 180,
+                "item_type": "special",
+                "effect": {"inversion_swap": True},
+                "is_active": True,
+                "requires_target": True,
+                "duration_hours": 1
+            }
+        ]
+        
+        # Insert all items
+        insert_result = await db.shop_items.insert_many(all_items)
+        print(f"Successfully inserted {len(insert_result.inserted_ids)} clean shop items")
+        
+        # Verify final count
+        final_count = await db.shop_items.count_documents({})
+        
+        return {
+            "message": "Shop duplicates fixed successfully",
+            "deleted_count": delete_result.deleted_count,
+            "inserted_count": len(insert_result.inserted_ids),
+            "total_items": final_count
+        }
+    
+    except Exception as e:
+        print(f"Error fixing shop duplicates: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to fix shop duplicates: {str(e)}")
+
 @api_router.post("/add-advanced-passes")
 async def add_advanced_passes():
     """Add the 7 advanced passes to existing shop"""
