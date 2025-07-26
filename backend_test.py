@@ -1474,4 +1474,5 @@ class FocusRoyaleNewFeaturesAPITester:
 
 if __name__ == "__main__":
     tester = FocusRoyaleNewFeaturesAPITester()
-    results = tester.run_all_tests()
+    # Run only the leaderboard sorting test as requested
+    results = tester.run_leaderboard_sorting_test()
