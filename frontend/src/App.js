@@ -1685,22 +1685,33 @@ function App() {
     };
   }, []);
 
-  // Update real-time chart data
+  // Generate hourly real-time data for chart
   useEffect(() => {
     if (activeTab === 'statistics') {
       const interval = setInterval(() => {
-        const now = Date.now();
-        const newDataPoint = {
-          time: new Date(now).toLocaleTimeString(),
-          clicks: activityTracker.clickCount,
-          activity: Math.max(0, 100 - (now - activityTracker.lastActivity) / 1000)
-        };
+        const now = new Date();
+        const currentHour = now.getHours();
         
-        setRealtimeData(prev => {
-          const updated = [...prev, newDataPoint].slice(-20); // Keep last 20 points
-          return updated;
-        });
-      }, 2000);
+        // Generate data for last 12 hours
+        const hourlyData = [];
+        for (let i = 11; i >= 0; i--) {
+          const hour = (currentHour - i + 24) % 24;
+          const hourString = `${hour.toString().padStart(2, '0')}:00`;
+          const activityCount = activityTracker.hourlyActivities[hour] || 0;
+          
+          // Calculate activity level (0-100) based on interactions
+          const activityLevel = Math.min(activityCount * 5, 100);
+          
+          hourlyData.push({
+            time: hourString,
+            activity: activityLevel,
+            hour: hour,
+            interactions: activityCount
+          });
+        }
+        
+        setRealtimeData(hourlyData);
+      }, 60000); // Update every minute
       
       return () => clearInterval(interval);
     }
