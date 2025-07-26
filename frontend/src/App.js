@@ -2577,6 +2577,47 @@ function App() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center">Activity Feed</h2>
             
+            {/* Trade Requests Section */}
+            {tradeRequests.length > 0 && (
+              <div className="card-enhanced rounded-lg overflow-hidden">
+                <div className="p-4 border-b" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                  <h3 className="text-lg font-semibold">🤝 Trade Requests</h3>
+                </div>
+                {tradeRequests.map((request, index) => (
+                  <div key={request.id} className="p-4 border-b last:border-b-0" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="font-medium mb-2">
+                          Trade Pass from <span className="font-bold">{request.sender_username}</span>
+                        </div>
+                        <div className="text-sm opacity-70 mb-3">
+                          {request.item_name} - {request.item_description}
+                        </div>
+                        <div className="text-xs opacity-60">
+                          {new Date(request.timestamp).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => respondToTradeRequest(request.id, true)}
+                          className="bg-green-600 text-white px-4 py-2 rounded font-semibold hover:bg-green-700 transition-colors"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => respondToTradeRequest(request.id, false)}
+                          className="bg-red-600 text-white px-4 py-2 rounded font-semibold hover:bg-red-700 transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Regular Activity Feed */}
             <div className="card-enhanced rounded-lg overflow-hidden">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center opacity-70">
