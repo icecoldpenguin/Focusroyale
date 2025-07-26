@@ -1651,30 +1651,36 @@ function App() {
     lastActivity: Date.now()
   });
 
-  // Track user interactions
+  // Track user interactions for hourly data
   useEffect(() => {
     const trackClick = () => {
-      setActivityTracker(prev => ({
-        ...prev,
-        clickCount: prev.clickCount + 1,
-        lastActivity: Date.now()
-      }));
+      const currentHour = new Date().getHours();
+      setActivityTracker(prev => {
+        const updatedHourlyActivities = { ...prev.hourlyActivities };
+        updatedHourlyActivities[currentHour] = (updatedHourlyActivities[currentHour] || 0) + 1;
+        
+        return {
+          ...prev,
+          currentHour,
+          hourlyActivities: updatedHourlyActivities,
+          sessionActions: prev.sessionActions + 1,
+          lastActivity: Date.now()
+        };
+      });
     };
 
-    const trackTabSwitch = () => {
-      setActivityTracker(prev => ({
-        ...prev,
-        tabSwitches: prev.tabSwitches + 1,
-        lastActivity: Date.now()
-      }));
+    const trackKeyPress = (e) => {
+      if (e.ctrlKey || e.metaKey) trackClick();
     };
 
     document.addEventListener('click', trackClick);
-    window.addEventListener('focus', trackTabSwitch);
-    
+    document.addEventListener('keydown', trackKeyPress);
+    window.addEventListener('focus', trackClick);
+
     return () => {
       document.removeEventListener('click', trackClick);
-      window.removeEventListener('focus', trackTabSwitch);
+      document.removeEventListener('keydown', trackKeyPress);
+      window.removeEventListener('focus', trackClick);
     };
   }, []);
 
