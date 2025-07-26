@@ -1644,6 +1644,7 @@ function App() {
 
   // Real-time hourly activity tracking
   const [realtimeHourlyData, setRealtimeHourlyData] = useState([]);
+  const [realtimeData, setRealtimeData] = useState([]);
   const [activityTracker, setActivityTracker] = useState({
     currentHour: new Date().getHours(),
     hourlyActivities: {},
