@@ -1582,6 +1582,15 @@ function App() {
     return gradient;
   };
 
+  // Create line gradient for line charts
+  const createLineGradient = (ctx, chartArea, colors) => {
+    if (!chartArea) return null;
+    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    gradient.addColorStop(0, colors.start);
+    gradient.addColorStop(1, colors.end);
+    return gradient;
+  };
+
   // Generate hourly activity heatmap data
   const generateHeatmapData = () => {
     if (!statistics?.daily_focus_time) return [];
