@@ -1642,11 +1642,11 @@ function App() {
     return ranges;
   };
 
-  // Real-time activity tracking
-  const [realtimeData, setRealtimeData] = useState([]);
+  // Real-time hourly activity tracking
+  const [realtimeHourlyData, setRealtimeHourlyData] = useState([]);
   const [activityTracker, setActivityTracker] = useState({
-    clickCount: 0,
-    tabSwitches: 0,
+    currentHour: new Date().getHours(),
+    hourlyActivities: {},
     sessionActions: 0,
     lastActivity: Date.now()
   });
