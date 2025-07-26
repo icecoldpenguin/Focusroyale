@@ -2596,7 +2596,7 @@ function App() {
               )}
             </div>
           ) : (
-            <LockedTabContent requiredLevel={3} />
+            <LockedTabContent requiredLevel={1} />
           )
         )}
 
