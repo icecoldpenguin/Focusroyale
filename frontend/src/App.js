@@ -1618,7 +1618,13 @@ function App() {
 
   // Generate session length distribution data
   const generateSessionLengthData = () => {
-    if (!statistics?.weekly_breakdown) return [];
+    if (!statistics?.weekly_breakdown) return [
+      { label: '0-15 min', count: 0 },
+      { label: '15-30 min', count: 0 },
+      { label: '30-45 min', count: 0 },
+      { label: '45-60 min', count: 0 },
+      { label: '60+ min', count: 0 }
+    ];
     
     const ranges = [
       { label: '0-15 min', min: 0, max: 15, count: 0 },
@@ -1628,11 +1634,12 @@ function App() {
       { label: '60+ min', min: 60, max: 1000, count: 0 }
     ];
     
+    // Estimate session lengths based on weekly data
     statistics.weekly_breakdown.forEach(week => {
       if (week.sessions_count > 0) {
         const avgSessionLength = week.focus_minutes / week.sessions_count;
         ranges.forEach(range => {
-          if (avgSessionLength >= range.min && avgSessionLength < range.max) {
+          if (avgSessionLength >= range.min && (avgSessionLength < range.max || range.min === 60)) {
             range.count += week.sessions_count;
           }
         });
