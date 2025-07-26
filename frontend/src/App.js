@@ -820,7 +820,7 @@ function App() {
   const getTabRequirements = (tab) => {
     switch (tab) {
       case 'statistics':
-        return { requiredLevel: 1, unlocked: currentUser?.level >= 1 };
+        return { requiredLevel: 3, unlocked: currentUser?.level >= 3 };
       case 'weekly-planner':
         return { requiredLevel: 5, unlocked: currentUser?.level >= 5 };
       case 'wheel':
