@@ -1591,19 +1591,26 @@ function App() {
       let totalMinutes = 0;
       let sessionCount = 0;
       
-      // Simulate hourly data based on existing daily data
+      // Generate realistic hourly data based on daily data
       Object.entries(statistics.daily_focus_time).forEach(([date, minutes]) => {
-        const dayIntensity = minutes / 60; // Convert to hours
-        const hourlyMinutes = Math.floor(Math.random() * dayIntensity * 10); // Distribute randomly
+        // Simulate hour distribution based on typical work patterns
+        const hourMultipliers = [
+          0.1, 0.1, 0.1, 0.1, 0.1, 0.2, // 0-5 AM: very low
+          0.3, 0.5, 0.8, 1.2, 1.5, 1.8, // 6-11 AM: increasing
+          1.5, 1.2, 1.5, 1.8, 1.5, 1.2, // 12-5 PM: peak hours
+          0.8, 0.5, 0.3, 0.2, 0.1, 0.1  // 6-11 PM: decreasing
+        ];
+        
+        const hourlyMinutes = (minutes * hourMultipliers[hour]) / 24;
         totalMinutes += hourlyMinutes;
         if (hourlyMinutes > 0) sessionCount++;
       });
       
       heatmapData.push({
         hour,
-        minutes: totalMinutes,
+        minutes: Math.round(totalMinutes),
         sessions: sessionCount,
-        intensity: Math.min(totalMinutes / 60, 5) // Cap at 5 hours
+        intensity: Math.min(totalMinutes / 30, 5) // Scale to max 5 intensity
       });
     }
     return heatmapData;
