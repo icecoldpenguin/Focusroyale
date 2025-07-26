@@ -2242,8 +2242,8 @@ function App() {
           currentUser.level >= 3 ? (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold">Study Statistics</h2>
-                <p className="opacity-70">Your focus and productivity insights</p>
+                <h2 className="text-2xl font-bold">📊 Activity Analytics</h2>
+                <p className="opacity-70">Track your every move and productivity insights</p>
               </div>
               
               {statistics && (
@@ -2251,24 +2251,25 @@ function App() {
                   {/* Overview Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     {[
-                      { label: 'Total Focus Time', value: `${statistics.user_stats.total_focus_time} min` },
-                      { label: 'Total Credits', value: statistics.user_stats.total_credits },
-                      { label: 'Tasks Completed', value: statistics.user_stats.total_tasks_completed },
-                      { label: 'Current Level', value: statistics.user_stats.current_level }
+                      { label: 'Total Focus Time', value: `${statistics.user_stats.total_focus_time} min`, icon: '⏱️' },
+                      { label: 'Total Credits', value: statistics.user_stats.total_credits, icon: '💰' },
+                      { label: 'Tasks Completed', value: statistics.user_stats.total_tasks_completed, icon: '✅' },
+                      { label: 'Current Level', value: statistics.user_stats.current_level, icon: '🎯' }
                     ].map((stat, index) => (
                       <div key={index} className="stats-card card-enhanced p-4 rounded-lg text-center" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}>
+                        <div className="text-3xl mb-2">{stat.icon}</div>
                         <div className="text-2xl font-bold">{stat.value}</div>
                         <div className="opacity-80">{stat.label}</div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Charts Grid */}
+                  {/* Enhanced Charts Grid */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Daily Focus Time Bar Chart */}
+                    {/* Daily Focus Time Bar Chart - Enhanced */}
                     <div className="card-enhanced p-6 rounded-lg chart-glow">
                       <h3 className="text-lg font-bold mb-4 chart-title">📊 Daily Focus Time (Last 7 Days)</h3>
-                      <div className="chart-container">
+                      <div className="chart-container-enhanced">
                         <Bar
                           data={{
                             labels: Object.keys(statistics.daily_focus_time).slice(-7),
@@ -2279,7 +2280,11 @@ function App() {
                                 const chart = context.chart;
                                 const {ctx, chartArea} = chart;
                                 if (!chartArea) return 'rgba(59, 130, 246, 0.8)';
-                                return createBarGradient(ctx, chartArea);
+                                return createAnimatedGradient(ctx, chartArea, [
+                                  'rgba(59, 130, 246, 0.1)',
+                                  'rgba(139, 92, 246, 0.6)',
+                                  'rgba(59, 130, 246, 1)'
+                                ], Date.now());
                               },
                               borderColor: 'rgba(59, 130, 246, 1)',
                               borderWidth: 2,
@@ -2312,44 +2317,43 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Task Completion Pie Chart */}
-                    <div className="card-enhanced p-6 rounded-lg">
-                      <h3 className="text-lg font-bold mb-4">Task Completion Breakdown</h3>
-                      <div className="chart-container">
-                        <Pie
+                    {/* Real-time Activity Tracker */}
+                    <div className="card-enhanced p-6 rounded-lg chart-glow chart-realtime">
+                      <h3 className="text-lg font-bold mb-4 chart-title">⚡ Real-time Activity</h3>
+                      <div className="chart-container-enhanced">
+                        <Line
                           data={{
-                            labels: ['Regular Tasks', 'Weekly Tasks'],
+                            labels: realtimeData.map(d => d.time),
                             datasets: [{
-                              data: [
-                                statistics.user_stats.regular_tasks_completed,
-                                statistics.user_stats.weekly_tasks_completed
-                              ],
-                              backgroundColor: [
-                                'rgba(34, 197, 94, 0.8)',
-                                'rgba(168, 85, 247, 0.8)'
-                              ],
-                              borderColor: [
-                                'rgba(34, 197, 94, 1)',
-                                'rgba(168, 85, 247, 1)'
-                              ],
-                              borderWidth: 2
+                              label: 'Activity Level',
+                              data: realtimeData.map(d => d.activity),
+                              borderColor: 'rgba(16, 185, 129, 1)',
+                              backgroundColor: (context) => {
+                                const chart = context.chart;
+                                const {ctx, chartArea} = chart;
+                                if (!chartArea) return 'rgba(16, 185, 129, 0.1)';
+                                return createLineGradient(ctx, chartArea, {
+                                  start: 'rgba(16, 185, 129, 0.1)',
+                                  end: 'rgba(16, 185, 129, 0.6)'
+                                });
+                              },
+                              fill: true,
+                              tension: 0.4,
+                              pointRadius: 4,
+                              pointHoverRadius: 8,
+                              pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                              pointBorderColor: '#ffffff',
+                              pointBorderWidth: 2
                             }]
                           }}
                           options={{
-                            responsive: true,
-                            plugins: {
-                              legend: {
-                                position: 'bottom',
-                                labels: {
-                                  color: 'var(--text-primary)'
-                                }
-                              },
-                              tooltip: {
-                                backgroundColor: 'var(--bg-secondary)',
-                                titleColor: 'var(--text-primary)',
-                                bodyColor: 'var(--text-primary)',
-                                borderColor: 'var(--border-color)',
-                                borderWidth: 1
+                            ...getChartOptions('line'),
+                            scales: {
+                              ...getChartOptions('line').scales,
+                              y: {
+                                ...getChartOptions('line').scales.y,
+                                min: 0,
+                                max: 100
                               }
                             }
                           }}
@@ -2357,10 +2361,76 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Weekly Progress Line Chart */}
-                    <div className="card-enhanced p-6 rounded-lg">
-                      <h3 className="text-lg font-bold mb-4">Weekly Progress</h3>
-                      <div className="chart-container">
+                    {/* Hourly Activity Heatmap */}
+                    <div className="card-enhanced p-6 rounded-lg chart-glow">
+                      <h3 className="text-lg font-bold mb-4 chart-title">🔥 Hourly Activity Heatmap</h3>
+                      <div className="heatmap-container">
+                        {generateHeatmapData().map((cell, index) => (
+                          <div
+                            key={index}
+                            className="heatmap-cell"
+                            style={{
+                              backgroundColor: `rgba(59, 130, 246, ${Math.min(cell.intensity / 5, 1)})`,
+                              border: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}
+                            title={`${cell.hour}:00 - ${cell.minutes} min focused`}
+                          />
+                        ))}
+                      </div>
+                      <div className="text-center mt-4 text-sm opacity-70">
+                        Hover over cells to see activity details
+                      </div>
+                    </div>
+
+                    {/* Session Length Distribution */}
+                    <div className="card-enhanced p-6 rounded-lg chart-glow">
+                      <h3 className="text-lg font-bold mb-4 chart-title">📈 Session Length Distribution</h3>
+                      <div className="chart-container-enhanced">
+                        <Pie
+                          data={{
+                            labels: generateSessionLengthData().map(d => d.label),
+                            datasets: [{
+                              data: generateSessionLengthData().map(d => d.count),
+                              backgroundColor: [
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(245, 158, 11, 0.8)',
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(59, 130, 246, 0.8)',
+                                'rgba(168, 85, 247, 0.8)'
+                              ],
+                              borderColor: [
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(245, 158, 11, 1)',
+                                'rgba(34, 197, 94, 1)',
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(168, 85, 247, 1)'
+                              ],
+                              borderWidth: 2,
+                              hoverOffset: 8
+                            }]
+                          }}
+                          options={{
+                            ...getChartOptions('pie'),
+                            plugins: {
+                              ...getChartOptions('pie').plugins,
+                              legend: {
+                                position: 'bottom',
+                                labels: {
+                                  color: 'var(--text-primary)',
+                                  padding: 20,
+                                  usePointStyle: true
+                                }
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Weekly Progress Line Chart - Enhanced */}
+                    <div className="card-enhanced p-6 rounded-lg chart-glow">
+                      <h3 className="text-lg font-bold mb-4 chart-title">📊 Weekly Progress Trends</h3>
+                      <div className="chart-container-enhanced">
                         <Line
                           data={{
                             labels: statistics.weekly_breakdown.map(w => new Date(w.week_start).toLocaleDateString()),
@@ -2369,42 +2439,156 @@ function App() {
                                 label: 'Focus Minutes',
                                 data: statistics.weekly_breakdown.map(w => w.focus_minutes),
                                 borderColor: 'rgba(34, 197, 94, 1)',
-                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                backgroundColor: (context) => {
+                                  const chart = context.chart;
+                                  const {ctx, chartArea} = chart;
+                                  if (!chartArea) return 'rgba(34, 197, 94, 0.1)';
+                                  return createLineGradient(ctx, chartArea, {
+                                    start: 'rgba(34, 197, 94, 0.1)',
+                                    end: 'rgba(34, 197, 94, 0.6)'
+                                  });
+                                },
                                 fill: true,
-                                tension: 0.4
+                                tension: 0.4,
+                                pointRadius: 6,
+                                pointHoverRadius: 10,
+                                pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 3
                               },
                               {
                                 label: 'Credits Earned',
                                 data: statistics.weekly_breakdown.map(w => w.credits_earned),
                                 borderColor: 'rgba(59, 130, 246, 1)',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                backgroundColor: (context) => {
+                                  const chart = context.chart;
+                                  const {ctx, chartArea} = chart;
+                                  if (!chartArea) return 'rgba(59, 130, 246, 0.1)';
+                                  return createLineGradient(ctx, chartArea, {
+                                    start: 'rgba(59, 130, 246, 0.1)',
+                                    end: 'rgba(59, 130, 246, 0.6)'
+                                  });
+                                },
                                 fill: true,
-                                tension: 0.4
+                                tension: 0.4,
+                                pointRadius: 6,
+                                pointHoverRadius: 10,
+                                pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 3
                               }
                             ]
                           }}
-                          options={getChartOptions()}
+                          options={getChartOptions('line')}
                         />
                       </div>
                     </div>
 
-                    {/* Credits Earned Bar Chart */}
-                    <div className="card-enhanced p-6 rounded-lg">
-                      <h3 className="text-lg font-bold mb-4">Daily Credits Earned</h3>
-                      <div className="chart-container">
+                    {/* Shop Purchase History */}
+                    <div className="card-enhanced p-6 rounded-lg chart-glow">
+                      <h3 className="text-lg font-bold mb-4 chart-title">🛍️ Shop Purchase History</h3>
+                      <div className="chart-container-enhanced">
                         <Bar
                           data={{
-                            labels: Object.keys(statistics.daily_credits).slice(-7),
+                            labels: generatePurchaseHistoryData().map(d => new Date(d.date).toLocaleDateString()),
                             datasets: [{
-                              label: 'Credits Earned',
-                              data: Object.values(statistics.daily_credits).slice(-7),
-                              backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                              label: 'Purchases',
+                              data: generatePurchaseHistoryData().map(d => d.purchases),
+                              backgroundColor: (context) => {
+                                const chart = context.chart;
+                                const {ctx, chartArea} = chart;
+                                if (!chartArea) return 'rgba(168, 85, 247, 0.8)';
+                                return createAnimatedGradient(ctx, chartArea, [
+                                  'rgba(168, 85, 247, 0.1)',
+                                  'rgba(59, 130, 246, 0.6)',
+                                  'rgba(168, 85, 247, 1)'
+                                ], Date.now());
+                              },
                               borderColor: 'rgba(168, 85, 247, 1)',
-                              borderWidth: 1
+                              borderWidth: 2,
+                              borderRadius: 8,
+                              borderSkipped: false
                             }]
                           }}
-                          options={getChartOptions()}
+                          options={getChartOptions('bar')}
                         />
+                      </div>
+                    </div>
+
+                    {/* Streak Analytics */}
+                    <div className="card-enhanced p-6 rounded-lg chart-glow">
+                      <h3 className="text-lg font-bold mb-4 chart-title">🔥 Streak Analytics</h3>
+                      <div className="chart-container-enhanced">
+                        <Line
+                          data={{
+                            labels: Object.keys(statistics.daily_focus_time).slice(-14),
+                            datasets: [{
+                              label: 'Daily Streak',
+                              data: Object.values(statistics.daily_focus_time).slice(-14).map((value, index, array) => {
+                                let streak = 0;
+                                for (let i = index; i >= 0; i--) {
+                                  if (array[i] > 0) streak++;
+                                  else break;
+                                }
+                                return streak;
+                              }),
+                              borderColor: 'rgba(245, 158, 11, 1)',
+                              backgroundColor: (context) => {
+                                const chart = context.chart;
+                                const {ctx, chartArea} = chart;
+                                if (!chartArea) return 'rgba(245, 158, 11, 0.1)';
+                                return createLineGradient(ctx, chartArea, {
+                                  start: 'rgba(245, 158, 11, 0.1)',
+                                  end: 'rgba(245, 158, 11, 0.6)'
+                                });
+                              },
+                              fill: true,
+                              tension: 0.4,
+                              pointRadius: 8,
+                              pointHoverRadius: 12,
+                              pointBackgroundColor: 'rgba(245, 158, 11, 1)',
+                              pointBorderColor: '#ffffff',
+                              pointBorderWidth: 3
+                            }]
+                          }}
+                          options={{
+                            ...getChartOptions('line'),
+                            scales: {
+                              ...getChartOptions('line').scales,
+                              y: {
+                                ...getChartOptions('line').scales.y,
+                                min: 0,
+                                ticks: {
+                                  ...getChartOptions('line').scales.y.ticks,
+                                  callback: function(value) {
+                                    return value + ' days';
+                                  }
+                                }
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Activity Summary */}
+                  <div className="card-enhanced p-6 rounded-lg chart-glow">
+                    <h3 className="text-lg font-bold mb-4 chart-title">📊 Activity Summary</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                        <div className="text-2xl font-bold text-blue-400">{activityTracker.clickCount}</div>
+                        <div className="text-sm opacity-70">Total Clicks</div>
+                      </div>
+                      <div className="text-center p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                        <div className="text-2xl font-bold text-green-400">{activityTracker.tabSwitches}</div>
+                        <div className="text-sm opacity-70">Tab Switches</div>
+                      </div>
+                      <div className="text-center p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                        <div className="text-2xl font-bold text-purple-400">
+                          {Math.floor((Date.now() - activityTracker.lastActivity) / 1000)}s
+                        </div>
+                        <div className="text-sm opacity-70">Last Activity</div>
                       </div>
                     </div>
                   </div>
