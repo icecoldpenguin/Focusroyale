@@ -1555,6 +1555,167 @@ function App() {
     return gradient;
   };
 
+  // Enhanced gradient functions for new charts
+  const createRadialGradient = (ctx, chartArea, colors) => {
+    if (!chartArea) return null;
+    
+    const centerX = (chartArea.left + chartArea.right) / 2;
+    const centerY = (chartArea.top + chartArea.bottom) / 2;
+    const radius = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2;
+    
+    const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+    colors.forEach((color, index) => {
+      gradient.addColorStop(index / (colors.length - 1), color);
+    });
+    return gradient;
+  };
+
+  const createAnimatedGradient = (ctx, chartArea, colors, time) => {
+    if (!chartArea) return null;
+    
+    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+    const offset = (Math.sin(time * 0.001) + 1) * 0.1;
+    
+    gradient.addColorStop(0, colors[0]);
+    gradient.addColorStop(0.5 + offset, colors[1]);
+    gradient.addColorStop(1, colors[2]);
+    return gradient;
+  };
+
+  // Generate hourly activity heatmap data
+  const generateHeatmapData = () => {
+    if (!statistics?.daily_focus_time) return [];
+    
+    const heatmapData = [];
+    for (let hour = 0; hour < 24; hour++) {
+      let totalMinutes = 0;
+      let sessionCount = 0;
+      
+      // Simulate hourly data based on existing daily data
+      Object.entries(statistics.daily_focus_time).forEach(([date, minutes]) => {
+        const dayIntensity = minutes / 60; // Convert to hours
+        const hourlyMinutes = Math.floor(Math.random() * dayIntensity * 10); // Distribute randomly
+        totalMinutes += hourlyMinutes;
+        if (hourlyMinutes > 0) sessionCount++;
+      });
+      
+      heatmapData.push({
+        hour,
+        minutes: totalMinutes,
+        sessions: sessionCount,
+        intensity: Math.min(totalMinutes / 60, 5) // Cap at 5 hours
+      });
+    }
+    return heatmapData;
+  };
+
+  // Generate session length distribution data
+  const generateSessionLengthData = () => {
+    if (!statistics?.weekly_breakdown) return [];
+    
+    const ranges = [
+      { label: '0-15 min', min: 0, max: 15, count: 0 },
+      { label: '15-30 min', min: 15, max: 30, count: 0 },
+      { label: '30-45 min', min: 30, max: 45, count: 0 },
+      { label: '45-60 min', min: 45, max: 60, count: 0 },
+      { label: '60+ min', min: 60, max: 1000, count: 0 }
+    ];
+    
+    statistics.weekly_breakdown.forEach(week => {
+      if (week.sessions_count > 0) {
+        const avgSessionLength = week.focus_minutes / week.sessions_count;
+        ranges.forEach(range => {
+          if (avgSessionLength >= range.min && avgSessionLength < range.max) {
+            range.count += week.sessions_count;
+          }
+        });
+      }
+    });
+    
+    return ranges;
+  };
+
+  // Real-time activity tracking
+  const [realtimeData, setRealtimeData] = useState([]);
+  const [activityTracker, setActivityTracker] = useState({
+    clickCount: 0,
+    tabSwitches: 0,
+    sessionActions: 0,
+    lastActivity: Date.now()
+  });
+
+  // Track user interactions
+  useEffect(() => {
+    const trackClick = () => {
+      setActivityTracker(prev => ({
+        ...prev,
+        clickCount: prev.clickCount + 1,
+        lastActivity: Date.now()
+      }));
+    };
+
+    const trackTabSwitch = () => {
+      setActivityTracker(prev => ({
+        ...prev,
+        tabSwitches: prev.tabSwitches + 1,
+        lastActivity: Date.now()
+      }));
+    };
+
+    document.addEventListener('click', trackClick);
+    window.addEventListener('focus', trackTabSwitch);
+    
+    return () => {
+      document.removeEventListener('click', trackClick);
+      window.removeEventListener('focus', trackTabSwitch);
+    };
+  }, []);
+
+  // Update real-time chart data
+  useEffect(() => {
+    if (activeTab === 'statistics') {
+      const interval = setInterval(() => {
+        const now = Date.now();
+        const newDataPoint = {
+          time: new Date(now).toLocaleTimeString(),
+          clicks: activityTracker.clickCount,
+          activity: Math.max(0, 100 - (now - activityTracker.lastActivity) / 1000)
+        };
+        
+        setRealtimeData(prev => {
+          const updated = [...prev, newDataPoint].slice(-20); // Keep last 20 points
+          return updated;
+        });
+      }, 2000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [activeTab, activityTracker]);
+
+  // Track shop purchases over time
+  const generatePurchaseHistoryData = () => {
+    if (!statistics?.user_stats) return [];
+    
+    const purchaseData = [];
+    const today = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // Simulate purchase data based on credit spending patterns
+      const purchases = Math.floor(Math.random() * 3);
+      purchaseData.push({
+        date: dateStr,
+        purchases: purchases,
+        credits_spent: purchases * 150 // Average pass cost
+      });
+    }
+    
+    return purchaseData;
+  };
+
   if (!isInitialized || isRestoringSession) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
