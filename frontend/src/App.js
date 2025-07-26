@@ -2484,7 +2484,6 @@ function App() {
             
             <div className="card-enhanced rounded-lg overflow-hidden">
               {users
-                .sort((a, b) => b.credits - a.credits)
                 .slice(0, 10)
                 .map((user, index) => (
                   <div key={user.id} className={`leaderboard-item flex justify-between items-center p-4 border-b last:border-b-0 ${
