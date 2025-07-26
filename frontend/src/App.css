@@ -17,13 +17,13 @@
 }
 
 [data-theme="dark"] {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #1a1a1a;
-  --bg-tertiary: #2a2a2a;
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #111111;
   --text-primary: #ffffff;
   --text-secondary: #e5e5e5;
   --text-muted: #cccccc;
-  --border-color: #404040;
+  --border-color: #1a1a1a;
   --accent-color: #ffffff;
   --accent-hover: #f0f0f0;
   --shadow-light: rgba(255, 255, 255, 0.15);
