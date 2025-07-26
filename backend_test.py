@@ -1388,6 +1388,39 @@ class FocusRoyaleNewFeaturesAPITester:
         self.log("✅ Daily Wheel Feature tests passed")
         return True
     
+    def run_leaderboard_sorting_test(self):
+        """Run ONLY the leaderboard sorting test"""
+        self.log("🚀 Starting Focus Royale LEADERBOARD SORTING Test")
+        self.log(f"Testing against: {self.base_url}")
+        
+        test_results = {
+            "API Health": self.test_api_health(),
+            "Leaderboard Sorting Logic": False
+        }
+        
+        if test_results["API Health"]:
+            test_results["Leaderboard Sorting Logic"] = self.test_leaderboard_sorting_logic()
+        
+        # Print summary
+        self.log("\n" + "="*60)
+        self.log("LEADERBOARD SORTING TEST SUMMARY")
+        self.log("="*60)
+        
+        all_passed = True
+        for test_name, result in test_results.items():
+            status = "✅ PASS" if result else "❌ FAIL"
+            self.log(f"{test_name}: {status}")
+            if not result:
+                all_passed = False
+        
+        self.log("="*60)
+        if all_passed:
+            self.log("🎉 LEADERBOARD SORTING TEST PASSED!")
+        else:
+            self.log("💥 LEADERBOARD SORTING TEST FAILED!")
+        
+        return test_results
+    
     def run_all_tests(self):
         """Run all NEW FEATURES test suites"""
         self.log("🚀 Starting Focus Royale NEW FEATURES Backend API Tests")
@@ -1401,7 +1434,8 @@ class FocusRoyaleNewFeaturesAPITester:
             "NEW Pass System": False,
             "Tasks System": False,
             "Notifications System": False,
-            "Temporary Effects": False
+            "Temporary Effects": False,
+            "Leaderboard Sorting Logic": False
         }
         
         if test_results["API Health"]:
@@ -1416,6 +1450,7 @@ class FocusRoyaleNewFeaturesAPITester:
                     test_results["Tasks System"] = self.test_tasks_system()
                     test_results["Notifications System"] = self.test_notifications_system()
                     test_results["Temporary Effects"] = self.test_temporary_effects()
+                    test_results["Leaderboard Sorting Logic"] = self.test_leaderboard_sorting_logic()
         
         # Print summary
         self.log("\n" + "="*60)
