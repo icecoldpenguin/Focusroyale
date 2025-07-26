@@ -1633,6 +1633,7 @@ class FocusRoyaleNewFeaturesAPITester:
             "Database Reset": False,
             "Authentication System": False,
             "Updated Credit Rate": False,
+            "Statistics Endpoint": False,  # PRIORITY TEST
             "NEW Pass System": False,
             "Tasks System": False,
             "Notifications System": False,
@@ -1648,6 +1649,7 @@ class FocusRoyaleNewFeaturesAPITester:
                 
                 if test_results["Authentication System"]:
                     test_results["Updated Credit Rate"] = self.test_updated_credit_rate()
+                    test_results["Statistics Endpoint"] = self.test_statistics_endpoint()  # PRIORITY TEST
                     test_results["NEW Pass System"] = self.test_new_pass_system()
                     test_results["Tasks System"] = self.test_tasks_system()
                     test_results["Notifications System"] = self.test_notifications_system()
