@@ -20,7 +20,7 @@ import base64
 from datetime import datetime, timedelta
 
 # Backend URL from frontend/.env
-BASE_URL = "https://24d34c78-b1c6-4214-80fe-5c7326cad262.preview.emergentagent.com/api"
+BASE_URL = "https://449d00ec-bd67-4d50-be7e-3d093d40f27f.preview.emergentagent.com/api"
 
 class FocusRoyaleUserUpdateAPITester:
     def __init__(self):
