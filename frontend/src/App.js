@@ -1730,18 +1730,29 @@ function App() {
     
     const purchaseData = [];
     const today = new Date();
+    const totalCredits = statistics.user_stats.total_credits;
     
+    // Generate purchase data for last 7 days based on user activity
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       const dateStr = date.toISOString().split('T')[0];
       
-      // Simulate purchase data based on credit spending patterns
-      const purchases = Math.floor(Math.random() * 3);
+      // Estimate purchases based on user level and activity
+      const userLevel = statistics.user_stats.current_level;
+      const dailyFocusMinutes = statistics.daily_focus_time[dateStr] || 0;
+      
+      // More active days = more likely to make purchases
+      let purchases = 0;
+      if (dailyFocusMinutes > 60) {
+        purchases = Math.floor(dailyFocusMinutes / 120) + Math.floor(userLevel / 2);
+      } else if (dailyFocusMinutes > 30) {
+        purchases = Math.floor(Math.random() * 2);
+      }
+      
       purchaseData.push({
         date: dateStr,
-        purchases: purchases,
-        credits_spent: purchases * 150 // Average pass cost
+        purchases: Math.min(purchases, 5) // Cap at 5 purchases per day
       });
     }
     
