@@ -1134,6 +1134,45 @@ function App() {
     }
   };
 
+  const fetchTradeRequests = async () => {
+    if (!currentUser) return;
+    try {
+      const response = await axios.get(`${API}/trade-requests/${currentUser.id}`);
+      setTradeRequests(response.data);
+    } catch (error) {
+      console.error('Failed to fetch trade requests:', error);
+    }
+  };
+
+  const respondToTradeRequest = async (tradeRequestId, accept) => {
+    if (!currentUser) return;
+    try {
+      const response = await axios.post(`${API}/trade-requests/respond`, {
+        user_id: currentUser.id,
+        trade_request_id: tradeRequestId,
+        accept: accept
+      });
+      
+      showNotification(
+        accept ? 'Trade request accepted!' : 'Trade request rejected!',
+        accept ? 'success' : 'info'
+      );
+      
+      // Refresh trade requests and user data
+      await fetchTradeRequests();
+      await fetchUsers();
+      await fetchNotifications();
+      
+      // Update current user data
+      const userResponse = await axios.get(`${API}/users/${currentUser.id}`);
+      setCurrentUser(userResponse.data);
+      
+    } catch (error) {
+      console.error('Failed to respond to trade request:', error);
+      showNotification('Failed to respond to trade request', 'error');
+    }
+  };
+
   const handleAuth = async (e) => {
     e.preventDefault();
     
