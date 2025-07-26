@@ -883,6 +883,7 @@ function App() {
         fetchWeeklyTasks();
         fetchSocialRate();
         fetchWheelStatus();
+        fetchTradeRequests();
         extendUserSession(); // Extend session on activity
       }, 3000);
 
