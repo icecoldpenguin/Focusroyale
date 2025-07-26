@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 # Backend URL from frontend/.env
-BASE_URL = "https://f5919dfa-994b-4db7-b004-23d729bea08b.preview.emergentagent.com/api"
+BASE_URL = "https://24d34c78-b1c6-4214-80fe-5c7326cad262.preview.emergentagent.com/api"
 
 class LeaderboardSortingTester:
     def __init__(self):
