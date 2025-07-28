@@ -1789,13 +1789,13 @@ body {
 
 @keyframes color-change {
   0% {
-    fill: var(--logo-color);
+    color: var(--logo-color);
   }
   50% {
-    fill: var(--accent-color);
+    color: var(--accent-color);
   }
   100% {
-    fill: var(--logo-color);
+    color: var(--logo-color);
   }
 }
 
