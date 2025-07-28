@@ -1762,8 +1762,34 @@ function App() {
   if (!isInitialized || isRestoringSession) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-        <div className="text-xl">
-          <div className="loading-spinner inline-block mr-3"></div>
+        <div className="loader">
+          <div className="box">
+            <div className="logo">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 200 60"
+                className="svg"
+              >
+                <text
+                  x="100"
+                  y="35"
+                  textAnchor="middle"
+                  fontSize="32"
+                  fontWeight="bold"
+                  fontFamily="Arial, sans-serif"
+                  fill="currentColor"
+                >
+                  RELVL
+                </text>
+              </svg>
+            </div>
+          </div>
+          <div className="box"></div>
+          <div className="box"></div>
+          <div className="box"></div>
+          <div className="box"></div>
+        </div>
+        <div className="loading-text">
           {isRestoringSession ? 'Restoring session...' : 'Initializing RELVL...'}
         </div>
       </div>
