@@ -1740,9 +1740,8 @@ body {
   padding: 30%;
 }
 
-.loader .logo svg {
-  fill: var(--logo-color);
-  width: 100%;
+.loader .logo div {
+  color: var(--logo-color);
   animation: color-change var(--duration) infinite ease-in-out;
 }
 
