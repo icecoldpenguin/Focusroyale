@@ -1764,9 +1764,6 @@ function App() {
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <div className="loader">
           <div className="box">
-            <div className="logo">
-              <div style={{ fontSize: '4rem', textAlign: 'center' }}>⚡</div>
-            </div>
           </div>
           <div className="box"></div>
           <div className="box"></div>
