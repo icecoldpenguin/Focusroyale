@@ -2043,7 +2043,7 @@ function App() {
                     <button
                       onClick={startFocusSession}
                       className="btn-enhanced px-4 py-2 rounded-lg font-semibold text-sm w-full"
-                      style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
+                      style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-solid-primary)' }}
                     >
                       Start Focus Session
                     </button>
