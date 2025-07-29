@@ -2143,53 +2143,53 @@ function App() {
                 )}
               </div>
             </div>
-          </div>
-        )}
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[
-                { label: 'Focus Credits', value: currentUser.credits },
-                { label: 'Focus Minutes', value: currentUser.total_focus_time },
-                { label: 'Credit Rate', value: `${currentUser.credit_rate_multiplier.toFixed(1)}x` },
-                { label: 'Tasks Done', value: currentUser.completed_tasks }
-              ].map((stat, index) => (
-                <div key={index} className="stats-card card-enhanced p-4 rounded-lg text-center" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="opacity-80">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Active Users */}
-            {activeUsers.length > 0 && (
-              <div className="card-enhanced p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">Currently Focusing</h3>
-                <div className="space-y-2">
-                  {activeUsers.map((user, index) => (
-                    <div key={user.id} className="active-user-item activity-item flex justify-between items-center p-3 rounded" style={{ animationDelay: `${index * 0.1}s` }}>
-                      <span className="font-medium flex items-center">
-                        <span 
-                          className="clickable-username"
-                          onClick={() => handleUserClick(user)}
-                        >
-                          {user.username}
-                        </span>
-                        {user.level > 1 && (
-                          <span className="ml-2 bg-yellow-400 text-black px-1.5 py-0.5 rounded text-xs">
-                            L{user.level}
-                          </span>
-                        )}
-                      </span>
-                      <div className="flex items-center space-x-3">
-                        <span className="text-sm opacity-70">{user.credits} FC</span>
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <div className="lg:col-span-12">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Focus Credits', value: currentUser.credits },
+                  { label: 'Focus Minutes', value: currentUser.total_focus_time },
+                  { label: 'Credit Rate', value: `${currentUser.credit_rate_multiplier.toFixed(1)}x` },
+                  { label: 'Tasks Done', value: currentUser.completed_tasks }
+                ].map((stat, index) => (
+                  <div key={index} className="stats-card card-enhanced p-4 rounded-lg text-center" style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <div className="opacity-80">{stat.label}</div>
+                  </div>
+                ))}
               </div>
-            )}
+
+              {/* Active Users */}
+              {activeUsers.length > 0 && (
+                <div className="card-enhanced p-6 rounded-lg mt-6">
+                  <h3 className="text-lg font-semibold mb-3">Currently Focusing</h3>
+                  <div className="space-y-2">
+                    {activeUsers.map((user, index) => (
+                      <div key={user.id} className="active-user-item activity-item flex justify-between items-center p-3 rounded" style={{ animationDelay: `${index * 0.1}s` }}>
+                        <span className="font-medium flex items-center">
+                          <span 
+                            className="clickable-username"
+                            onClick={() => handleUserClick(user)}
+                          >
+                            {user.username}
+                          </span>
+                          {user.level > 1 && (
+                            <span className="ml-2 bg-yellow-400 text-black px-1.5 py-0.5 rounded text-xs">
+                              L{user.level}
+                            </span>
+                          )}
+                        </span>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-sm opacity-70">{user.credits} FC</span>
+                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
