@@ -34,14 +34,18 @@
 }
 
 body {
-  background-color: var(--bg-primary);
+  background: var(--bg-primary);
   color: var(--text-primary);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
 }
 
 .App {
   text-align: center;
   min-height: 100vh;
-  background-color: var(--bg-primary);
+  background: var(--bg-primary);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
 }
 
 /* Mobile-First Responsive Design */
