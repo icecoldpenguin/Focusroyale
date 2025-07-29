@@ -691,6 +691,46 @@ function App() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Time completion calculation functions
+  const calculateTimeStats = () => {
+    const now = new Date();
+    
+    // Calculate day completion (0-100%)
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const dayProgress = (now - startOfDay) / (endOfDay - startOfDay);
+    const dayPercent = Math.floor(dayProgress * 100);
+    
+    // Calculate month completion (0-100%)
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthProgress = (now - startOfMonth) / (endOfMonth - startOfMonth);
+    const monthPercent = Math.floor(monthProgress * 100);
+    
+    // Calculate year completion (0-100%)
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+    const yearProgress = (now - startOfYear) / (endOfYear - startOfYear);
+    const yearPercent = Math.floor(yearProgress * 100);
+    
+    return { dayPercent, monthPercent, yearPercent };
+  };
+
+  // Update time stats every minute
+  useEffect(() => {
+    const updateStats = () => {
+      setTimeStats(calculateTimeStats());
+    };
+    
+    // Update immediately
+    updateStats();
+    
+    // Update every minute
+    const interval = setInterval(updateStats, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   // Timer countdown effect
   useEffect(() => {
     let interval = null;
