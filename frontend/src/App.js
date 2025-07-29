@@ -2011,119 +2011,140 @@ function App() {
       <div className="max-w-6xl mx-auto p-6">
         {/* Dashboard Tab */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-6">
-            {/* Focus Timer */}
-            <div className={`focus-timer-container card-enhanced p-6 rounded-lg ${
-              focusSession ? 'focus-session-active' : 'focus-session-inactive'
-            }`}>
-              <h2 className="text-xl font-bold mb-4">Focus Session</h2>
-              
-              {!focusSession ? (
-                <div className="text-center">
-                  <p className="mb-2 opacity-80">
-                    Ready to earn some Focus Credits (FC)?
-                  </p>
-                  <div className="card-enhanced p-3 mb-4" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
-                    <div className="font-semibold mb-1 focus-credits-animation">
-                      Social Rate: {socialRate.social_multiplier.toFixed(1)}x ({socialRate.credits_per_hour} FC/hour)
-                    </div>
-                    <div className="text-xs opacity-70">
-                      {socialRate.active_users_count} users focusing = {socialRate.social_multiplier.toFixed(1)}x multiplier
-                    </div>
-                    <div className="text-xs opacity-70 mt-1">
-                      Your personal rate: {(socialRate.social_multiplier * currentUser.credit_rate_multiplier).toFixed(1)}x
-                    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            {/* Main Content Area - Time Completion Stats */}
+            <div className="lg:col-span-8 flex flex-col justify-center space-y-8">
+              <div className="time-completion-container">
+                <div className="completion-stat">
+                  <div className="completion-text gradient-text-primary">
+                    We've completed {timeStats.dayPercent}% of the day
                   </div>
-                  <button
-                    onClick={startFocusSession}
-                    className="btn-enhanced px-8 py-3 rounded-lg font-semibold"
-                    style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
-                  >
-                    Start Focus Session
-                  </button>
                 </div>
-              ) : (
-                <div className="text-center">
-                  <div className="p-4 rounded-lg mb-4" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', border: '2px solid #10b981' }}>
-                    <div className="text-2xl font-bold text-green-800 mb-2">FOCUSING</div>
-                    <div className="text-green-700">
-                      Started at {new Date(focusSession.start_time).toLocaleTimeString()}
-                    </div>
-                    <div className="text-sm text-green-600 mt-2">
-                      Earning {(socialRate.social_multiplier * currentUser.credit_rate_multiplier * 30).toFixed(1)} FC per hour
-                    </div>
-                    <div className="text-xs text-green-600">
-                      Social: {socialRate.social_multiplier.toFixed(1)}x • Personal: {currentUser.credit_rate_multiplier.toFixed(1)}x
-                    </div>
+                <div className="completion-stat">
+                  <div className="completion-text gradient-text-secondary">
+                    {timeStats.monthPercent}% of the month
                   </div>
-                  
-                  {/* Timer Component - Only available during focus sessions */}
-                  <div className="timer-container">
-                    <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
-                      Focus Timer
-                    </h3>
-                    
-                    {/* Duration Selector */}
-                    <div className="timer-duration-selector">
-                      {[10, 20, 30, 45, 60, 90, 120, 180, 240].map((minutes) => (
-                        <button
-                          key={minutes}
-                          onClick={() => setTimerDuration(minutes)}
-                          className={`timer-duration-btn ${timer.duration === minutes ? 'active' : ''}`}
-                          disabled={timer.isRunning}
-                        >
-                          {minutes >= 60 ? `${Math.floor(minutes/60)}h${minutes%60 ? ` ${minutes%60}m` : ''}` : `${minutes}m`}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    {/* Timer Display */}
-                    <div className="timer-display">
-                      {formatTime(timer.timeLeft)}
-                    </div>
-                    
-                    {/* Timer Controls */}
-                    <div className="timer-controls">
-                      {!timer.isRunning ? (
-                        <button
-                          onClick={startTimer}
-                          className="timer-btn start"
-                          disabled={timer.timeLeft === 0}
-                        >
-                          ▶️ {timer.isSet ? 'Resume' : 'Start'}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={pauseTimer}
-                          className="timer-btn pause"
-                        >
-                          ⏸️ Pause
-                        </button>
-                      )}
-                      
-                      <button
-                        onClick={resetTimer}
-                        className="timer-btn reset"
-                        disabled={!timer.isSet}
-                      >
-                        🔄 Reset
-                      </button>
-                    </div>
-                    
-                    <div className="text-xs mt-2 opacity-70" style={{ color: 'var(--text-secondary)' }}>
-                      {timer.isRunning ? '🟢 Timer is running' : timer.isSet ? '⏸️ Timer is paused' : '⏱️ Set a timer to stay focused'}
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={endFocusSession}
-                    className="btn-enhanced bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 mt-4"
-                  >
-                    End Session
-                  </button>
                 </div>
-              )}
+                <div className="completion-stat">
+                  <div className="completion-text gradient-text-tertiary">
+                    {timeStats.yearPercent}% of the year
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Focus Session Section - Right Side */}
+            <div className="lg:col-span-4">
+              <div className={`focus-timer-container card-enhanced p-4 rounded-lg ${
+                focusSession ? 'focus-session-active' : 'focus-session-inactive'
+              }`}>
+                <h2 className="text-lg font-bold mb-3">Focus Session</h2>
+                
+                {!focusSession ? (
+                  <div className="text-center">
+                    <p className="mb-2 opacity-80 text-sm">
+                      Ready to earn FC?
+                    </p>
+                    <div className="card-enhanced p-2 mb-3 text-xs" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                      <div className="font-semibold mb-1 focus-credits-animation">
+                        {socialRate.social_multiplier.toFixed(1)}x ({socialRate.credits_per_hour} FC/h)
+                      </div>
+                      <div className="text-xs opacity-70">
+                        {socialRate.active_users_count} users = {socialRate.social_multiplier.toFixed(1)}x
+                      </div>
+                      <div className="text-xs opacity-70 mt-1">
+                        Your rate: {(socialRate.social_multiplier * currentUser.credit_rate_multiplier).toFixed(1)}x
+                      </div>
+                    </div>
+                    <button
+                      onClick={startFocusSession}
+                      className="btn-enhanced px-4 py-2 rounded-lg font-semibold text-sm w-full"
+                      style={{ backgroundColor: 'var(--accent-color)', color: 'var(--bg-primary)' }}
+                    >
+                      Start Focus Session
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <div className="p-3 rounded-lg mb-3 text-sm" style={{ backgroundColor: 'rgba(16, 185, 129, 0.2)', border: '2px solid #10b981' }}>
+                      <div className="text-lg font-bold text-green-800 mb-1">FOCUSING</div>
+                      <div className="text-green-700 text-xs">
+                        Started {new Date(focusSession.start_time).toLocaleTimeString()}
+                      </div>
+                      <div className="text-xs text-green-600 mt-1">
+                        Earning {(socialRate.social_multiplier * currentUser.credit_rate_multiplier * 30).toFixed(1)} FC/h
+                      </div>
+                      <div className="text-xs text-green-600">
+                        Social: {socialRate.social_multiplier.toFixed(1)}x • Personal: {currentUser.credit_rate_multiplier.toFixed(1)}x
+                      </div>
+                    </div>
+                    
+                    {/* Compact Timer Component */}
+                    <div className="timer-container-compact">
+                      <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
+                        Focus Timer
+                      </h3>
+                      
+                      {/* Compact Duration Selector */}
+                      <div className="timer-duration-selector-compact">
+                        {[10, 30, 60, 120].map((minutes) => (
+                          <button
+                            key={minutes}
+                            onClick={() => setTimerDuration(minutes)}
+                            className={`timer-duration-btn-compact ${timer.duration === minutes ? 'active' : ''}`}
+                            disabled={timer.isRunning}
+                          >
+                            {minutes >= 60 ? `${minutes/60}h` : `${minutes}m`}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      {/* Timer Display */}
+                      <div className="timer-display-compact">
+                        {formatTime(timer.timeLeft)}
+                      </div>
+                      
+                      {/* Timer Controls */}
+                      <div className="timer-controls-compact">
+                        {!timer.isRunning ? (
+                          <button
+                            onClick={startTimer}
+                            className="timer-btn-compact start"
+                            disabled={timer.timeLeft === 0}
+                          >
+                            ▶️ {timer.isSet ? 'Resume' : 'Start'}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={pauseTimer}
+                            className="timer-btn-compact pause"
+                          >
+                            ⏸️ Pause
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={resetTimer}
+                          className="timer-btn-compact reset"
+                          disabled={!timer.isSet}
+                        >
+                          🔄
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={endFocusSession}
+                      className="btn-enhanced bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 mt-3 w-full text-sm"
+                    >
+                      End Session
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
