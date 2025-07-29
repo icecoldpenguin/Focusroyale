@@ -1,34 +1,31 @@
 /* RELVL Custom Styles */
 
-/* CSS Variables for theme support */
+/* CSS Variables for black-grey gradient theme */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --text-primary: #1a202c;
-  --text-secondary: #2d3748;
-  --text-muted: #4a5568;
-  --border-color: #cbd5e0;
-  --accent-color: #1a202c;
-  --accent-hover: #2d3748;
-  --shadow-light: rgba(0, 0, 0, 0.1);
-  --shadow-medium: rgba(0, 0, 0, 0.15);
-  --gradient-primary: linear-gradient(135deg, #1a202c, #2d3748);
-}
-
-[data-theme="dark"] {
-  --bg-primary: #000000;
-  --bg-secondary: #0a0a0a;
-  --bg-tertiary: #111111;
+  --bg-primary: linear-gradient(135deg, #000000, #1a1a1a, #2d2d2d, #1a1a1a, #000000);
+  --bg-secondary: linear-gradient(135deg, #0a0a0a, #1f1f1f, #333333, #1f1f1f, #0a0a0a);
+  --bg-tertiary: linear-gradient(135deg, #111111, #2a2a2a, #404040, #2a2a2a, #111111);
+  --bg-solid-primary: #0a0a0a;
+  --bg-solid-secondary: #1a1a1a;
+  --bg-solid-tertiary: #2d2d2d;
   --text-primary: #ffffff;
   --text-secondary: #e5e5e5;
   --text-muted: #cccccc;
-  --border-color: #1a1a1a;
+  --border-color: linear-gradient(135deg, #333333, #555555, #777777, #555555, #333333);
+  --border-solid: #333333;
   --accent-color: #ffffff;
   --accent-hover: #f0f0f0;
-  --shadow-light: rgba(255, 255, 255, 0.15);
-  --shadow-medium: rgba(255, 255, 255, 0.25);
-  --gradient-primary: linear-gradient(135deg, #ffffff, #f0f0f0);
+  --shadow-light: rgba(255, 255, 255, 0.1);
+  --shadow-medium: rgba(255, 255, 255, 0.2);
+  --gradient-primary: linear-gradient(135deg, #ffffff, #e0e0e0, #c0c0c0, #e0e0e0, #ffffff);
+  
+  /* Animated gradients for text */
+  --gradient-text-1: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4, #10b981);
+  --gradient-text-2: linear-gradient(45deg, #8b5cf6, #06b6d4, #10b981, #f59e0b);
+  --gradient-text-3: linear-gradient(45deg, #06b6d4, #10b981, #f59e0b, #ef4444);
+  --gradient-text-4: linear-gradient(45deg, #10b981, #f59e0b, #ef4444, #3b82f6);
+  --gradient-text-5: linear-gradient(45deg, #f59e0b, #ef4444, #3b82f6, #8b5cf6);
+  --gradient-text-6: linear-gradient(45deg, #ef4444, #3b82f6, #8b5cf6, #06b6d4);
 }
 
 /* Global transitions */
