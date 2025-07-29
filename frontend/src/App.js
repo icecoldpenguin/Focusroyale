@@ -631,6 +631,13 @@ function App() {
     isSet: false
   });
 
+  // Time completion percentages state  
+  const [timeStats, setTimeStats] = useState({
+    dayPercent: 0,
+    monthPercent: 0,
+    yearPercent: 0
+  });
+
   // Trade requests state
   const [tradeRequests, setTradeRequests] = useState([]);
 
