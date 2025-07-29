@@ -1813,9 +1813,9 @@ function App() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen flex items-center justify-center login-container" style={{ backgroundColor: 'var(--bg-primary)' }}>
-        <ThreeBackground darkMode={darkMode} />
-        <FloatingDoodles darkMode={darkMode} />
+      <div className="min-h-screen flex items-center justify-center login-container" style={{ background: 'var(--bg-primary)' }}>
+        <ThreeBackground darkMode={true} />
+        <FloatingDoodles darkMode={true} />
         
         {/* Removed theme toggle - using single gradient theme */}
         
