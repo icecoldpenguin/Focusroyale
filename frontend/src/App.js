@@ -455,7 +455,7 @@ const UserSettingsModal = ({ isOpen, onClose, currentUser, onUpdateUser }) => {
       <div 
         className="modal-content card-enhanced p-6 rounded-lg max-w-md w-full mx-4 relative max-h-screen overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
-        style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        style={{ background: 'var(--bg-solid-primary)', color: 'var(--text-primary)' }}
       >
         <button
           onClick={onClose}
