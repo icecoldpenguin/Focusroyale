@@ -1817,10 +1817,7 @@ function App() {
         <ThreeBackground darkMode={darkMode} />
         <FloatingDoodles darkMode={darkMode} />
         
-        {/* Theme Toggle in top-right corner */}
-        <div className="absolute top-6 right-6 z-50">
-          <ThemeToggle />
-        </div>
+        {/* Removed theme toggle - using single gradient theme */}
         
         <div className="login-card p-8 rounded-xl shadow-2xl max-w-md w-full mx-4 relative z-10">
           <h1 className="login-title text-3xl font-bold text-center mb-2">RELVL</h1>
