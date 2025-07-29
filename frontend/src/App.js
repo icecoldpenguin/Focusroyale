@@ -54,12 +54,13 @@ const ThemeProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-  }, [darkMode]);
+    // Remove theme attribute since we're using single gradient theme
+    document.documentElement.removeAttribute('data-theme');
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleTheme }}>
-      <div className={`App ${darkMode ? 'dark' : 'light'}`}>
+    <ThemeContext.Provider value={{ darkMode: true, toggleTheme: () => {} }}>
+      <div className="App">
         {children}
       </div>
     </ThemeContext.Provider>
