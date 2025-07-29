@@ -67,21 +67,7 @@ const ThemeProvider = ({ children }) => {
   );
 };
 
-// Theme Toggle Component
-const ThemeToggle = () => {
-  const { darkMode, toggleTheme } = useTheme();
-  
-  return (
-    <button
-      onClick={toggleTheme}
-      className="theme-toggle-btn btn-enhanced p-2 rounded-lg transition-all duration-300"
-      style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}
-      title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
-    >
-      {darkMode ? '☀️' : '🌙'}
-    </button>
-  );
-};
+// Removed theme toggle - using single gradient theme
 
 // Floating Doodles Component
 const FloatingDoodles = ({ darkMode }) => {
