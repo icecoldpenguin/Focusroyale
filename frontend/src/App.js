@@ -2029,7 +2029,7 @@ function App() {
                     <p className="mb-2 opacity-80 text-sm">
                       Ready to earn FC?
                     </p>
-                    <div className="card-enhanced p-2 mb-3 text-xs" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
+                    <div className="card-enhanced p-2 mb-3 text-xs" style={{ background: 'var(--bg-solid-tertiary)' }}>
                       <div className="font-semibold mb-1 focus-credits-animation">
                         {socialRate.social_multiplier.toFixed(1)}x ({socialRate.credits_per_hour} FC/h)
                       </div>
