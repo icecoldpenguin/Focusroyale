@@ -1947,7 +1947,7 @@ function App() {
             >
               ⚙️
             </button>
-            <ThemeToggle />
+            {/* Removed theme toggle */}
             <button
               onClick={handleLogout}
               className="btn-enhanced px-3 py-1 rounded"
